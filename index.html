@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Rede Play Stex — servidor brasileiro de SA-MP RPG. Construa sua história em San Andreas."
+    />
+    <meta name="theme-color" content="#050b16" />
+    <title>Rede Play Stex — SA-MP RPG</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="noise" aria-hidden="true"></div>
+
+    <header class="site-header" id="inicio">
+      <div class="container nav-wrap">
+        <a class="brand" href="#inicio" aria-label="Rede Play Stex — início">
+          <span class="brand-mark" aria-hidden="true"><i></i><b>R</b></span>
+          <span class="brand-copy">
+            <strong>REDE PLAY</strong>
+            <small>STEX</small>
+          </span>
+        </a>
+
+        <button class="menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false">
+          <span></span><span></span>
+        </button>
+
+        <nav class="main-nav" aria-label="Navegação principal">
+          <a href="#inicio">Início</a>
+          <a href="#servidor">Servidor</a>
+          <a href="#como-jogar">Como jogar</a>
+          <a href="#comunidade">Comunidade</a>
+        </nav>
+
+        <a class="nav-cta" href="#como-jogar">
+          Jogar agora
+          <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-glow" aria-hidden="true"></div>
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <div class="eyebrow reveal">
+              <span class="live-dot"></span>
+              Servidor RPG brasileiro
+            </div>
+            <h1 class="reveal delay-1">
+              SUA HISTÓRIA<br />
+              <span>COMEÇA AQUI.</span>
+            </h1>
+            <p class="hero-text reveal delay-2">
+              Construa sua vida em San Andreas. Escolha seu caminho, faça aliados e deixe sua marca em um mundo onde cada decisão conta.
+            </p>
+            <div class="hero-actions reveal delay-3">
+              <button class="button button-primary copy-ip" type="button">
+                <span>Jogar agora</span>
+                <span class="button-icon" aria-hidden="true">→</span>
+              </button>
+              <a class="button button-ghost discord-link" href="#comunidade">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M19.5 5.3A17.6 17.6 0 0 0 15.2 4l-.5 1a16.5 16.5 0 0 0-5.4 0l-.5-1c-1.5.3-3 .8-4.3 1.3C1.8 9.3 1.1 13.2 1.5 17c1.8 1.3 3.6 2.1 5.4 2.6l1.3-1.8-1.8-.9.4-.3c3.5 1.6 7.3 1.6 10.8 0l.5.3-1.9.9 1.3 1.8c1.8-.5 3.6-1.3 5.3-2.6.5-4.4-.8-8.2-3.3-11.7ZM8.7 14.6c-1 0-1.9-1-1.9-2.3 0-1.2.9-2.2 1.9-2.2s1.9 1 1.9 2.2c0 1.3-.8 2.3-1.9 2.3Zm6.6 0c-1 0-1.9-1-1.9-2.3 0-1.2.9-2.2 1.9-2.2s1.9 1 1.9 2.2c0 1.3-.8 2.3-1.9 2.3Z" />
+                </svg>
+                Discord
+              </a>
+            </div>
+            <div class="server-address reveal delay-3">
+              <span class="address-label">IP DO SERVIDOR</span>
+              <button class="address-value copy-ip" type="button" aria-label="Copiar IP do servidor">
+                <code data-server-ip>play.redeplaystex.com:7777</code>
+                <span class="copy-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M8 8h11v11H8zM5 16H4V4h12v1" /></svg>
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div class="hero-visual reveal delay-2" aria-label="Painel do servidor Rede Play Stex">
+            <div class="visual-grid" aria-hidden="true"></div>
+            <div class="sun" aria-hidden="true"></div>
+            <div class="city city-back" aria-hidden="true"></div>
+            <div class="city city-front" aria-hidden="true"></div>
+            <div class="road-lines" aria-hidden="true"><i></i><i></i><i></i></div>
+
+            <div class="visual-topline">
+              <span>LOS SANTOS</span>
+              <span>RPG • BR</span>
+            </div>
+
+            <div class="status-card">
+              <div class="status-card-head">
+                <div>
+                  <span class="card-kicker">STATUS DO SERVIDOR</span>
+                  <strong><span class="live-dot"></span> ONLINE</strong>
+                </div>
+                <span class="signal" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+              </div>
+              <div class="players-row">
+                <span><b data-player-count>247</b> jogadores conectados</span>
+                <span data-player-limit>500 slots</span>
+              </div>
+              <div class="progress" aria-hidden="true"><i data-player-progress></i></div>
+            </div>
+
+            <div class="floating-tag tag-economy">
+              <span class="tag-icon">$</span>
+              <span><small>ECONOMIA</small><strong>Balanceada</strong></span>
+            </div>
+            <div class="floating-tag tag-world">
+              <span class="tag-icon">✦</span>
+              <span><small>MUNDO</small><strong>Vivo e dinâmico</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="container stats-bar reveal">
+          <div><strong>+50</strong><span>profissões</span></div>
+          <div><strong>24/7</strong><span>servidor online</span></div>
+          <div><strong>+10K</strong><span>personagens criados</span></div>
+          <div><strong>RPG</strong><span>experiência completa</span></div>
+        </div>
+      </section>
+
+      <section class="features section" id="servidor">
+        <div class="container">
+          <div class="section-heading reveal">
+            <div>
+              <span class="section-index">01 / SERVIDOR</span>
+              <h2>UM MUNDO.<br /><span>SUAS ESCOLHAS.</span></h2>
+            </div>
+            <p>
+              Uma experiência RPG construída para quem quer mais do que apenas jogar: quer viver uma história.
+            </p>
+          </div>
+
+          <div class="bento-grid">
+            <article class="feature-card feature-large reveal">
+              <div class="feature-number">01</div>
+              <div class="feature-art city-art" aria-hidden="true">
+                <div class="art-sun"></div>
+                <span class="building b1"></span><span class="building b2"></span><span class="building b3"></span><span class="building b4"></span>
+              </div>
+              <div class="feature-content">
+                <span class="feature-icon">⌁</span>
+                <h3>Vida sem roteiro</h3>
+                <p>Comece do zero e construa seu próprio destino. Trabalhe, empreenda, negocie e conquiste seu espaço na cidade.</p>
+              </div>
+            </article>
+
+            <article class="feature-card reveal delay-1">
+              <div class="feature-number">02</div>
+              <div class="feature-content">
+                <span class="feature-icon">◎</span>
+                <h3>Economia viva</h3>
+                <p>Um mercado dinâmico, com negócios e oportunidades que respondem às ações dos jogadores.</p>
+              </div>
+              <div class="mini-chart" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><span></span></div>
+            </article>
+
+            <article class="feature-card reveal delay-2">
+              <div class="feature-number">03</div>
+              <div class="feature-content">
+                <span class="feature-icon">◇</span>
+                <h3>Facções & famílias</h3>
+                <p>Entre para uma organização, forme sua família e dispute influência por toda San Andreas.</p>
+              </div>
+              <div class="crew-stack" aria-hidden="true"><i>R</i><i>P</i><i>S</i><b>+99</b></div>
+            </article>
+
+            <article class="feature-card feature-wide reveal">
+              <div class="feature-number">04</div>
+              <div class="feature-content">
+                <span class="feature-icon">↯</span>
+                <h3>Eventos que movimentam a cidade</h3>
+                <p>Corridas, operações, festas e desafios exclusivos com recompensas especiais para a comunidade.</p>
+              </div>
+              <div class="event-chip"><span></span> PRÓXIMO EVENTO EM BREVE</div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="steps section" id="como-jogar">
+        <div class="container steps-grid">
+          <div class="steps-video reveal">
+            <div class="video-frame">
+              <iframe
+                src="https://www.youtube-nocookie.com/embed/q_JpeBns6ic?rel=0&modestbranding=1"
+                title="Vídeo da Rede Play Stex"
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen
+              ></iframe>
+            </div>
+            <div class="video-caption">
+              <span><i></i> VÍDEO OFICIAL</span>
+              <strong>CONHEÇA A REDE PLAY STEX</strong>
+            </div>
+          </div>
+
+          <ol class="step-list">
+            <li class="reveal">
+              <span class="step-number">01</span>
+              <div>
+                <h3>Instale o GTA San Andreas</h3>
+                <p>Tenha uma instalação limpa do jogo no seu computador.</p>
+              </div>
+              <a
+                class="step-check step-download"
+                href="https://www.mediafire.com/file/ons2s0pof0dvtpj/GTA_STEX.rar/file"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Baixar GTA San Andreas"
+                title="Baixar GTA San Andreas"
+              >↓</a>
+            </li>
+            <li class="reveal delay-1">
+              <span class="step-number">02</span>
+              <div>
+                <h3>Baixe o SA-MP</h3>
+                <p>Instale o multiplayer e abra a lista de servidores.</p>
+              </div>
+              <a
+                class="step-check step-download"
+                href="https://www.moddb.com/mods/san-andreas-multiplayer/downloads/sa-mp-0-3-7-r3-1"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Baixar SA-MP"
+                title="Baixar SA-MP"
+              >↓</a>
+            </li>
+            <li class="reveal delay-2">
+              <span class="step-number">03</span>
+              <div>
+                <h3>Conecte e crie sua história</h3>
+                <p>Adicione nosso IP aos favoritos, escolha seu nome e entre.</p>
+              </div>
+              <span class="step-arrow">↗</span>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="community section" id="comunidade">
+        <div class="container">
+          <div class="community-card reveal">
+            <div class="community-grid" aria-hidden="true"></div>
+            <div class="community-orb" aria-hidden="true"></div>
+            <div class="community-copy">
+              <span class="section-index">03 / COMUNIDADE</span>
+              <h2>A CIDADE<br /><span>NUNCA DORME.</span></h2>
+              <p>Entre no nosso Discord, acompanhe as novidades e faça parte de uma comunidade que vive o RPG todos os dias.</p>
+              <a class="button button-dark discord-link" href="https://discord.gg/redeplaystex" target="_blank" rel="noreferrer">
+                Entrar no Discord
+                <span class="button-icon" aria-hidden="true">↗</span>
+              </a>
+            </div>
+            <div class="community-panel" aria-hidden="true">
+              <div class="panel-logo"><span class="brand-mark"><i></i><b>R</b></span></div>
+              <div class="panel-line"><span></span><i></i></div>
+              <strong>REDE PLAY STEX</strong>
+              <small>COMUNIDADE OFICIAL</small>
+              <div class="online-count"><i></i> <b>1.284</b> membros online</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-top">
+        <a class="brand" href="#inicio">
+          <span class="brand-mark" aria-hidden="true"><i></i><b>R</b></span>
+          <span class="brand-copy"><strong>REDE PLAY</strong><small>STEX</small></span>
+        </a>
+        <p>Mais que um servidor.<br />Uma cidade para chamar de sua.</p>
+        <nav aria-label="Links do rodapé">
+          <a href="#servidor">Servidor</a>
+          <a href="#como-jogar">Como jogar</a>
+          <a class="discord-link" href="https://discord.gg/redeplaystex" target="_blank" rel="noreferrer">Discord</a>
+        </nav>
+      </div>
+      <div class="container footer-bottom">
+        <span>© <span data-current-year></span> Rede Play Stex. Todos os direitos reservados.</span>
+        <span>SA-MP RPG • BRASIL</span>
+      </div>
+    </footer>
+
+    <div class="toast" role="status" aria-live="polite">
+      <span>✓</span>
+      <div><strong>IP copiado!</strong><small data-toast-ip>play.redeplaystex.com:7777</small></div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
