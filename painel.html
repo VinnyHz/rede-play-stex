@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Área do jogador da Rede Play Stex." />
+    <meta name="theme-color" content="#050b16" />
+    <title>Área do Jogador — Rede Play Stex</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="painel.css" />
+  </head>
+  <body class="portal-body">
+    <div class="noise" aria-hidden="true"></div>
+    <div class="portal-glow portal-glow-one" aria-hidden="true"></div>
+    <div class="portal-glow portal-glow-two" aria-hidden="true"></div>
+
+    <header class="portal-header">
+      <div class="portal-container portal-nav">
+        <a class="brand" href="index.html" aria-label="Rede Play Stex — início">
+          <span class="brand-mark" aria-hidden="true"><i></i><b>R</b></span>
+          <span class="brand-copy">
+            <strong>REDE PLAY</strong>
+            <small>STEX</small>
+          </span>
+        </a>
+        <span class="portal-label">ÁREA DO JOGADOR</span>
+        <a class="back-link" href="index.html">
+          <span aria-hidden="true">←</span>
+          Voltar ao site
+        </a>
+      </div>
+    </header>
+
+    <main class="portal-main">
+      <section class="login-view portal-container" data-login-view>
+        <div class="login-intro">
+          <span class="section-index">PORTAL / 01</span>
+          <h1>SUA VIDA.<br /><span>SEUS NÚMEROS.</span></h1>
+          <p>
+            Use sua conta criada dentro do jogo e acompanhe a evolução do seu personagem onde estiver.
+          </p>
+
+          <div class="intro-features" aria-label="Recursos da área do jogador">
+            <div>
+              <span>01</span>
+              <p><strong>Saldo completo</strong><small>Carteira, banco e VIP Coins</small></p>
+            </div>
+            <div>
+              <span>02</span>
+              <p><strong>Progresso do personagem</strong><small>Nível, experiência e profissão</small></p>
+            </div>
+            <div>
+              <span>03</span>
+              <p><strong>Conta sincronizada</strong><small>Dados atualizados pelo servidor</small></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="login-panel">
+          <div class="login-card">
+            <div class="login-card-head">
+              <span class="login-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm8 8a8 8 0 0 0-16 0" /></svg>
+              </span>
+              <div>
+                <span>CONTA RPS</span>
+                <h2>Bem-vindo de volta</h2>
+              </div>
+            </div>
+
+            <form class="login-form" data-login-form novalidate>
+              <label for="character-name">Nome do personagem</label>
+              <div class="field-wrap">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm8 8a8 8 0 0 0-16 0" /></svg>
+                <input
+                  id="character-name"
+                  name="character"
+                  type="text"
+                  autocomplete="username"
+                  minlength="3"
+                  maxlength="24"
+                  pattern="[A-Za-z0-9_]+"
+                  placeholder="Ex.: Vinny_Stex"
+                  required
+                />
+              </div>
+
+              <div class="password-label">
+                <label for="character-code">Código temporário</label>
+                <small>Use /painel dentro do jogo</small>
+              </div>
+              <div class="field-wrap">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V8a5 5 0 0 1 10 0v2m-11 0h12v11H6z" /></svg>
+                <input
+                  id="character-code"
+                  name="code"
+                  type="text"
+                  autocomplete="one-time-code"
+                  minlength="8"
+                  maxlength="8"
+                  pattern="[A-Za-z0-9]+"
+                  placeholder="Ex.: AB12CD34"
+                  required
+                />
+              </div>
+
+              <div class="form-alert" role="alert" data-form-alert hidden></div>
+
+              <button class="portal-submit" type="submit" data-login-submit>
+                <span data-submit-label>Entrar na minha conta</span>
+                <span class="submit-arrow" aria-hidden="true">→</span>
+              </button>
+            </form>
+
+            <div class="security-note">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v5c0 5 3.4 8.5 8 10 4.6-1.5 8-5 8-10V6l-8-3Zm-3 9 2 2 4-4" /></svg>
+              <p><strong>Conexão protegida</strong><small>O código expira em cinco minutos e funciona somente uma vez.</small></p>
+            </div>
+          </div>
+          <p class="account-help">Entre no servidor e use <strong>/painel</strong> para receber seu código de acesso.</p>
+        </div>
+      </section>
+
+      <section class="dashboard-view portal-container" data-dashboard-view hidden>
+        <div class="dashboard-topbar">
+          <div>
+            <span class="section-index">PAINEL / CONTA SINCRONIZADA</span>
+            <h1>OLÁ, <span data-player-first-name>JOGADOR</span>.</h1>
+            <p>Este é o resumo da sua vida em San Andreas.</p>
+          </div>
+          <div class="dashboard-actions">
+            <div class="sync-status"><i></i><span>Sincronizado<br /><small data-last-sync>agora</small></span></div>
+            <button class="logout-button" type="button" data-logout>SAIR <span>↗</span></button>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <article class="profile-card dashboard-card">
+            <div class="profile-cover">
+              <span>PERSONAGEM ATIVO</span>
+              <i></i>
+            </div>
+            <div class="character-avatar" data-player-initial>R</div>
+            <div class="profile-main">
+              <span>ID <b data-account-id>#0000</b></span>
+              <h2 data-player-name>Jogador_RPS</h2>
+              <p data-job-name>Cidadão de San Andreas</p>
+            </div>
+            <div class="profile-level">
+              <div><span>NÍVEL ATUAL</span><strong data-level>1</strong></div>
+              <div class="level-progress"><i data-level-progress></i></div>
+              <small><b data-exp>0</b> XP conquistados</small>
+            </div>
+          </article>
+
+          <div class="balance-grid">
+            <article class="balance-card dashboard-card">
+              <div class="metric-head"><span>$</span><small>CARTEIRA</small></div>
+              <strong data-cash>R$ 0</strong>
+              <p>Dinheiro em mãos</p>
+            </article>
+            <article class="balance-card dashboard-card">
+              <div class="metric-head"><span>▦</span><small>BANCO</small></div>
+              <strong data-bank>R$ 0</strong>
+              <p>Saldo bancário</p>
+            </article>
+            <article class="balance-card vip-coins-card dashboard-card">
+              <div class="metric-head"><span>◆</span><small>VIP COINS</small></div>
+              <strong data-vip-coins>0</strong>
+              <p>Moedas disponíveis</p>
+            </article>
+            <article class="balance-card dashboard-card">
+              <div class="metric-head"><span>◷</span><small>TEMPO JOGADO</small></div>
+              <strong data-play-time>0h</strong>
+              <p>Tempo total na cidade</p>
+            </article>
+          </div>
+
+          <article class="stats-card dashboard-card">
+            <div class="card-title-row">
+              <div><span>ESTATÍSTICAS</span><h3>Histórico do personagem</h3></div>
+              <span class="season-tag">TEMPORADA ATUAL</span>
+            </div>
+            <div class="stats-list">
+              <div><span>ABATES</span><strong data-kills>0</strong><i class="stat-up">↗</i></div>
+              <div><span>MORTES</span><strong data-deaths>0</strong><i>—</i></div>
+              <div><span>RELAÇÃO K/D</span><strong data-kd>0.00</strong><i class="stat-up">↗</i></div>
+              <div><span>NÍVEL DE PROCURADO</span><strong data-wanted>0</strong><i>★</i></div>
+            </div>
+          </article>
+
+          <article class="vip-card dashboard-card">
+            <div class="vip-pattern" aria-hidden="true"></div>
+            <div class="vip-card-copy">
+              <span>PLANO VIP</span>
+              <h3 data-vip-name>Nenhum plano ativo</h3>
+              <p data-vip-description>Conheça os benefícios exclusivos disponíveis para seu personagem.</p>
+              <a href="index.html#comunidade">Ver benefícios <b>↗</b></a>
+            </div>
+            <div class="vip-emblem" aria-hidden="true">V</div>
+          </article>
+        </div>
+
+        <p class="dashboard-footnote">
+          Os dados exibidos são sincronizados pelo servidor. Último login no jogo: <strong data-last-login>não informado</strong>.
+        </p>
+      </section>
+    </main>
+
+    <footer class="portal-footer">
+      <div class="portal-container">
+        <span>© <span data-current-year></span> REDE PLAY STEX</span>
+        <span>PAINEL SEGURO • SA-MP RPG</span>
+      </div>
+    </footer>
+
+    <script src="painel.js"></script>
+  </body>
+</html>
