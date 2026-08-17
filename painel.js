@@ -45,6 +45,30 @@ const formatRelativeTime = (dateValue) => {
   return `há ${Math.floor(seconds / 86400)} dias`;
 };
 
+const renderPlayerSkin = (skinValue, playerName) => {
+  const image = document.querySelector("[data-player-skin]");
+  if (!image) return;
+
+  const skinId = Number.parseInt(skinValue, 10);
+  const safeSkinId = Number.isInteger(skinId) && skinId >= 0 && skinId <= 311 ? skinId : 0;
+  const skinCard = image.closest(".character-skin");
+  const fallbackUrl = "https://assets.open.mp/assets/images/skins/0.png";
+
+  skinCard?.classList.remove("is-unavailable");
+  image.hidden = false;
+  image.alt = `Skin atual de ${playerName}`;
+  image.onerror = () => {
+    if (!image.src.endsWith("/0.png")) {
+      image.src = fallbackUrl;
+      return;
+    }
+
+    image.hidden = true;
+    skinCard?.classList.add("is-unavailable");
+  };
+  image.src = `https://assets.open.mp/assets/images/skins/${safeSkinId}.png`;
+};
+
 const jobNames = {
   0: "Cidadão de San Andreas",
   1: "Caminhoneiro",
@@ -119,7 +143,7 @@ const renderDashboard = (player) => {
 
   setText("[data-player-first-name]", firstName);
   setText("[data-player-name]", name);
-  setText("[data-player-initial]", name.charAt(0).toUpperCase());
+  renderPlayerSkin(player.skin, name);
   setText("[data-account-id]", `#${String(player.accountId ?? 0).padStart(4, "0")}`);
   setText("[data-job-name]", player.jobName || jobNames[player.job] || `Profissão #${player.job}`);
   setText("[data-level]", level);

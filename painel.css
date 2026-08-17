@@ -537,19 +537,65 @@
   box-shadow: 0 0 10px #5bd794;
 }
 
-.character-avatar {
+.character-skin {
   position: relative;
-  display: grid;
-  width: 76px;
-  height: 76px;
-  margin: -38px 0 0 26px;
+  z-index: 2;
+  display: flex;
+  overflow: hidden;
+  width: 112px;
+  height: 150px;
+  margin: -76px 0 0 26px;
+  align-items: flex-end;
+  justify-content: center;
   border: 5px solid #091526;
   border-radius: 17px;
-  color: #07101e;
-  background: var(--portal-blue);
-  place-items: center;
-  font: 700 30px/1 "Space Grotesk", sans-serif;
+  background:
+    radial-gradient(circle at 50% 25%, rgba(76, 141, 255, 0.28), transparent 58%),
+    linear-gradient(160deg, #102743, #07111f 72%);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+}
+
+.character-skin::after {
+  position: absolute;
+  inset: auto 0 0;
+  height: 45%;
+  content: "";
+  background: linear-gradient(transparent, rgba(3, 9, 18, 0.9));
+  pointer-events: none;
+}
+
+.character-skin img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 12px 12px rgba(0, 0, 0, 0.38));
+}
+
+.character-skin figcaption {
+  position: absolute;
+  z-index: 1;
+  right: 0;
+  bottom: 11px;
+  left: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font: 700 7px/1 "Space Grotesk", sans-serif;
+  letter-spacing: 0.14em;
+  text-align: center;
+}
+
+.character-skin.is-unavailable img {
+  display: none;
+}
+
+.character-skin.is-unavailable::before {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  color: var(--portal-blue);
+  content: "?";
+  place-items: center;
+  font: 700 34px/1 "Space Grotesk", sans-serif;
 }
 
 .profile-main {
