@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Loja oficial da Rede Play Stex — produtos e benefícios para seu personagem."
+    />
+    <meta name="theme-color" content="#050b16" />
+    <title>Loja — Rede Play Stex</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="loja.css" />
+  </head>
+  <body class="store-body">
+    <div class="noise" aria-hidden="true"></div>
+    <div class="store-glow store-glow-one" aria-hidden="true"></div>
+    <div class="store-glow store-glow-two" aria-hidden="true"></div>
+
+    <header class="store-header">
+      <div class="store-container store-nav">
+        <a class="brand" href="index.html" aria-label="Rede Play Stex — início">
+          <span class="brand-mark" aria-hidden="true"><i></i><b>R</b></span>
+          <span class="brand-copy">
+            <strong>REDE PLAY</strong>
+            <small>STEX</small>
+          </span>
+        </a>
+
+        <span class="store-label">LOJA OFICIAL</span>
+
+        <nav class="store-links" aria-label="Navegação da loja">
+          <a href="index.html">Voltar ao site</a>
+          <a class="account-link" href="painel.html">Área do jogador <span aria-hidden="true">↗</span></a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="store-hero store-container">
+        <div class="store-hero-copy">
+          <span class="store-kicker"><i></i> LOJA / REDE PLAY STEX</span>
+          <h1>VANTAGENS PARA<br /><span>SUA HISTÓRIA.</span></h1>
+          <p>
+            Escolha seu plano de Sócio, conecte sua conta e use seu saldo de MV.
+            O benefício será preparado diretamente para seu personagem.
+          </p>
+          <a class="store-scroll-link" href="#produtos">
+            Ver produtos
+            <span aria-hidden="true">↓</span>
+          </a>
+        </div>
+
+        <div class="store-hero-card" aria-hidden="true">
+          <div class="hero-card-grid"></div>
+          <span class="hero-card-tag">COMPRA SEGURA</span>
+          <div class="hero-card-icon">
+            <svg viewBox="0 0 24 24"><path d="M7 9V7a5 5 0 0 1 10 0v2m-12 0h14l-1 12H6L5 9Zm7 5v2" /></svg>
+          </div>
+          <strong>LOJA RPS</strong>
+          <small>ENTREGA AUTOMÁTICA</small>
+          <div class="hero-card-status"><i></i> SISTEMA PROTEGIDO</div>
+        </div>
+      </section>
+
+      <section class="store-catalog store-container" id="produtos">
+        <div class="catalog-heading">
+          <div>
+            <span class="store-index">01 / PRODUTOS</span>
+            <h2>ESCOLHA SEU<br /><span>BENEFÍCIO.</span></h2>
+          </div>
+          <p>
+            Todos os planos abaixo duram 31 dias. Escolha o que combina com seu personagem e confira os benefícios.
+          </p>
+        </div>
+
+        <div class="product-grid">
+          <article class="product-card" style="--plan-accent: #d7832e">
+            <div class="product-topline"><span>PLANO SÓCIO</span><b>01</b></div>
+            <div class="product-symbol plan-badge" aria-hidden="true">C</div>
+            <h3>Sócio Comum</h3>
+            <p class="product-duration">ATIVO POR 31 DIAS</p>
+            <ul class="product-benefits">
+              <li>Recebe 2 níveis</li>
+              <li>Recebe 400k no banco</li>
+              <li>Tag Sócio bronze</li>
+              <li>Até 3 veículos próprios</li>
+            </ul>
+            <div class="product-price"><small>POR MÊS</small><strong>20.000 <em>MV</em></strong></div>
+            <button
+              type="button"
+              data-plan-select
+              data-plan-id="socio-comum"
+              data-plan-name="Sócio Comum"
+              data-plan-price="20000"
+              aria-pressed="false"
+            >Escolher plano</button>
+          </article>
+
+          <article class="product-card" style="--plan-accent: #295fa5">
+            <div class="product-topline"><span>PLANO SÓCIO</span><b>02</b></div>
+            <div class="product-symbol plan-badge" aria-hidden="true">P</div>
+            <h3>Sócio Premium</h3>
+            <p class="product-duration">ATIVO POR 31 DIAS</p>
+            <ul class="product-benefits">
+              <li>Recebe 3 níveis</li>
+              <li>Recebe 600k no banco</li>
+              <li>Tag azul-marinho</li>
+              <li>Bônus no payday</li>
+            </ul>
+            <div class="product-price"><small>POR MÊS</small><strong>22.000 <em>MV</em></strong></div>
+            <button
+              type="button"
+              data-plan-select
+              data-plan-id="socio-premium"
+              data-plan-name="Sócio Premium"
+              data-plan-price="22000"
+              aria-pressed="false"
+            >Escolher plano</button>
+          </article>
+
+          <article class="product-card product-featured" style="--plan-accent: #60d9ef">
+            <div class="featured-tag">MAIS POPULAR</div>
+            <div class="product-topline"><span>PLANO SÓCIO</span><b>03</b></div>
+            <div class="product-symbol plan-badge" aria-hidden="true">D</div>
+            <h3>Sócio Diamante</h3>
+            <p class="product-duration">ATIVO POR 31 DIAS</p>
+            <ul class="product-benefits">
+              <li>Recebe 4 níveis</li>
+              <li>Recebe 800k no banco</li>
+              <li>Tag Sócio Diamante</li>
+              <li>Destaque no chat</li>
+              <li>Caixa bônus</li>
+            </ul>
+            <div class="product-price"><small>POR MÊS</small><strong>24.000 <em>MV</em></strong></div>
+            <button
+              type="button"
+              data-plan-select
+              data-plan-id="socio-diamante"
+              data-plan-name="Sócio Diamante"
+              data-plan-price="24000"
+              aria-pressed="false"
+            >Escolher plano</button>
+          </article>
+
+          <article class="product-card" style="--plan-accent: #2ed17d">
+            <div class="product-topline"><span>PLANO SÓCIO</span><b>04</b></div>
+            <div class="product-symbol plan-badge" aria-hidden="true">E</div>
+            <h3>Sócio Esmeralda</h3>
+            <p class="product-duration">ATIVO POR 31 DIAS</p>
+            <ul class="product-benefits">
+              <li>Recebe 4 níveis</li>
+              <li>Recebe 900k no banco</li>
+              <li>Tag Sócio Esmeralda</li>
+              <li>Destaque verde no chat</li>
+            </ul>
+            <div class="product-price"><small>POR MÊS</small><strong>27.000 <em>MV</em></strong></div>
+            <button
+              type="button"
+              data-plan-select
+              data-plan-id="socio-esmeralda"
+              data-plan-name="Sócio Esmeralda"
+              data-plan-price="27000"
+              aria-pressed="false"
+            >Escolher plano</button>
+          </article>
+
+          <article class="product-card" style="--plan-accent: #d9dde5">
+            <div class="product-topline"><span>PLANO SÓCIO</span><b>05</b></div>
+            <div class="product-symbol plan-badge" aria-hidden="true">B</div>
+            <h3>Sócio Black</h3>
+            <p class="product-duration">ATIVO POR 31 DIAS</p>
+            <ul class="product-benefits">
+              <li>Recebe 5 níveis</li>
+              <li>Recebe 1kk no banco</li>
+              <li>Tag Sócio Black</li>
+              <li>Prioridade máxima</li>
+            </ul>
+            <div class="product-price"><small>POR MÊS</small><strong>30.000 <em>MV</em></strong></div>
+            <button
+              type="button"
+              data-plan-select
+              data-plan-id="socio-black"
+              data-plan-name="Sócio Black"
+              data-plan-price="30000"
+              aria-pressed="false"
+            >Escolher plano</button>
+          </article>
+        </div>
+
+        <div class="plan-selection" data-plan-selection hidden>
+          <div>
+            <small>PLANO SELECIONADO</small>
+            <strong data-selected-plan>Nenhum plano</strong>
+            <span data-selected-price>0 MV</span>
+          </div>
+          <a href="painel.html?return=loja.html" data-plan-continue>Conectar personagem <span aria-hidden="true">→</span></a>
+        </div>
+      </section>
+
+      <section class="purchase-flow store-container" aria-labelledby="flow-title">
+        <div class="flow-heading">
+          <span class="store-index">02 / COMO FUNCIONA</span>
+          <h2 id="flow-title">DA LOJA PARA<br /><span>O SEU JOGO.</span></h2>
+        </div>
+        <ol>
+          <li><span>01</span><div><strong>Escolha o produto</strong><small>Selecione o pacote que deseja comprar.</small></div></li>
+          <li><span>02</span><div><strong>Conecte seu personagem</strong><small>Use o código gerado com o comando /painel.</small></div></li>
+          <li><span>03</span><div><strong>Confirme com MV</strong><small>Confira o plano e seu saldo antes de finalizar.</small></div></li>
+          <li><span>04</span><div><strong>Receba no servidor</strong><small>O benefício será entregue automaticamente.</small></div></li>
+        </ol>
+      </section>
+    </main>
+
+    <footer class="store-footer">
+      <div class="store-container store-footer-content">
+        <span>© <span data-store-year></span> Rede Play Stex</span>
+        <nav aria-label="Links do rodapé">
+          <a href="index.html">Site</a>
+          <a href="painel.html">Área do jogador</a>
+          <a href="https://discord.gg/redeplaystex" target="_blank" rel="noreferrer">Suporte</a>
+        </nav>
+      </div>
+    </footer>
+
+    <script src="loja.js"></script>
+  </body>
+</html>
