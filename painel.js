@@ -3,6 +3,25 @@ const PORTAL_CONFIG = {
   tokenKey: "rps_portal_session",
 };
 
+const requestedReturn = new URLSearchParams(window.location.search).get("return");
+const safeReturnPage = requestedReturn === "loja.html" ? "loja.html" : "";
+
+const getPortalToken = () =>
+  localStorage.getItem(PORTAL_CONFIG.tokenKey) || sessionStorage.getItem(PORTAL_CONFIG.tokenKey);
+
+const savePortalToken = (token) => {
+  localStorage.setItem(PORTAL_CONFIG.tokenKey, token);
+  sessionStorage.removeItem(PORTAL_CONFIG.tokenKey);
+};
+
+const clearPortalToken = () => {
+  localStorage.removeItem(PORTAL_CONFIG.tokenKey);
+  sessionStorage.removeItem(PORTAL_CONFIG.tokenKey);
+};
+
+const previousTabToken = sessionStorage.getItem(PORTAL_CONFIG.tokenKey);
+if (previousTabToken && !localStorage.getItem(PORTAL_CONFIG.tokenKey)) savePortalToken(previousTabToken);
+
 const loginView = document.querySelector("[data-login-view]");
 const dashboardView = document.querySelector("[data-dashboard-view]");
 const loginForm = document.querySelector("[data-login-form]");
@@ -108,7 +127,7 @@ const setLoading = (loading) => {
 };
 
 const apiRequest = async (path, options = {}) => {
-  const token = sessionStorage.getItem(PORTAL_CONFIG.tokenKey);
+  const token = getPortalToken();
   const headers = {
     "Content-Type": "application/json",
     ...(options.headers || {}),
@@ -169,6 +188,14 @@ const renderDashboard = (player) => {
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
+const finishAuthentication = (player) => {
+  if (safeReturnPage) {
+    window.location.replace(safeReturnPage);
+    return;
+  }
+  renderDashboard(player);
+};
+
 const showLogin = () => {
   dashboardView.hidden = true;
   loginView.hidden = false;
@@ -197,9 +224,9 @@ loginForm.addEventListener("submit", async (event) => {
       }),
     });
 
-    sessionStorage.setItem(PORTAL_CONFIG.tokenKey, result.token);
+    savePortalToken(result.token);
     loginForm.reset();
-    renderDashboard(result.player);
+    finishAuthentication(result.player);
   } catch (error) {
     if (error.status === 401) showAlert("Personagem ou código incorretos ou expirados.");
     else if (error.status === 404) showAlert("Essa conta ainda não foi sincronizada pelo servidor.");
@@ -216,19 +243,19 @@ logoutButton.addEventListener("click", async () => {
   } catch {
     // A sessão local também deve ser encerrada se a API estiver indisponível.
   }
-  sessionStorage.removeItem(PORTAL_CONFIG.tokenKey);
+  clearPortalToken();
   showLogin();
 });
 
 const restoreSession = async () => {
-  const token = sessionStorage.getItem(PORTAL_CONFIG.tokenKey);
+  const token = getPortalToken();
   if (!token || PORTAL_CONFIG.apiUrl.includes("SEU-SUBDOMINIO")) return;
 
   try {
     const result = await apiRequest("/api/me");
-    renderDashboard(result.player);
+    finishAuthentication(result.player);
   } catch {
-    sessionStorage.removeItem(PORTAL_CONFIG.tokenKey);
+    clearPortalToken();
     showLogin();
   }
 };

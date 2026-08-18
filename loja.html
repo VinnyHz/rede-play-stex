@@ -80,6 +80,15 @@
           </p>
         </div>
 
+        <div class="store-account-state" data-store-account>
+          <span><i></i> CONTA DA LOJA</span>
+          <div>
+            <strong data-store-account-name>Verificando conexão...</strong>
+            <small data-store-account-balance>Entre na Área do Jogador para usar seu saldo de MV.</small>
+          </div>
+          <a href="painel.html?return=loja.html" data-store-account-link>Conectar personagem</a>
+        </div>
+
         <div class="product-grid">
           <article class="product-card" style="--plan-accent: #d7832e">
             <div class="product-topline"><span>PLANO SÓCIO</span><b>01</b></div>
@@ -199,8 +208,12 @@
             <small>PLANO SELECIONADO</small>
             <strong data-selected-plan>Nenhum plano</strong>
             <span data-selected-price>0 MV</span>
+            <small class="purchase-status" data-purchase-status hidden></small>
           </div>
-          <a href="painel.html?return=loja.html" data-plan-continue>Conectar personagem <span aria-hidden="true">→</span></a>
+          <button type="button" data-plan-continue>
+            <span data-plan-continue-label>Conectar personagem</span>
+            <span aria-hidden="true">→</span>
+          </button>
         </div>
       </section>
 
