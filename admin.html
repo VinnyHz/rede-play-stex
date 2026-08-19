@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <meta name="theme-color" content="#050b16" />
+    <title>Painel restrito — Rede Play Stex</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="admin.css" />
+  </head>
+  <body>
+    <div class="admin-noise" aria-hidden="true"></div>
+
+    <header class="admin-header">
+      <div class="admin-container admin-nav">
+        <div class="admin-brand" aria-label="Rede Play Stex">
+          <span class="admin-brand-mark">R</span>
+          <span><strong>REDE PLAY</strong><small>STEX / RESTRITO</small></span>
+        </div>
+        <span class="security-badge">ACESSO PROTEGIDO</span>
+      </div>
+    </header>
+
+    <main class="admin-main admin-container">
+      <section class="access-gate" data-admin-gate>
+        <span class="gate-icon" aria-hidden="true">◇</span>
+        <p class="eyebrow">PAINEL / VERIFICAÇÃO</p>
+        <h1 data-gate-title>VERIFICANDO<br /><span>ACESSO.</span></h1>
+        <p data-gate-message>Confirmando sua sessão e permissão no servidor.</p>
+        <a href="painel.html" data-gate-login hidden>Entrar pela Área do Jogador</a>
+      </section>
+
+      <section class="admin-dashboard" data-admin-dashboard hidden>
+        <div class="dashboard-heading">
+          <div>
+            <p class="eyebrow">ADMINISTRAÇÃO / PIX</p>
+            <h1>PEDIDOS<br /><span>PENDENTES.</span></h1>
+          </div>
+          <div class="admin-identity">
+            <small>ADMINISTRADOR AUTORIZADO</small>
+            <strong data-admin-name>--</strong>
+            <button type="button" data-admin-logout>Sair do painel</button>
+          </div>
+        </div>
+
+        <div class="admin-toolbar">
+          <label>
+            <span>FILTRAR PEDIDOS</span>
+            <select data-order-filter>
+              <option value="awaiting_payment">Aguardando conferência</option>
+              <option value="queued">Aprovados / aguardando jogo</option>
+              <option value="processing">Em entrega</option>
+              <option value="completed">Concluídos</option>
+              <option value="rejected">Recusados</option>
+              <option value="failed">Falhas</option>
+              <option value="">Todos</option>
+            </select>
+          </label>
+          <button type="button" class="refresh-button" data-refresh-orders>Atualizar agora</button>
+        </div>
+
+        <div class="admin-warning">
+          <strong>Antes de aprovar</strong>
+          <p>Confira o recebimento diretamente no aplicativo da Caixa. Um comprovante enviado pelo jogador pode ser falso.</p>
+        </div>
+
+        <div class="admin-feedback" role="status" data-admin-feedback hidden></div>
+        <div class="orders-grid" data-orders-list aria-live="polite"></div>
+      </section>
+    </main>
+
+    <script src="admin.js"></script>
+  </body>
+</html>
