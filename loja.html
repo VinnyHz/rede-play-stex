@@ -48,8 +48,8 @@
           <span class="store-kicker"><i></i> LOJA / REDE PLAY STEX</span>
           <h1>VANTAGENS PARA<br /><span>SUA HISTÓRIA.</span></h1>
           <p>
-            Escolha seu plano de Sócio, conecte sua conta e use seu saldo de MV.
-            O benefício será preparado diretamente para seu personagem.
+            Escolha seu plano de Sócio e pague com MV ou Pix. Compras com MV
+            são entregues automaticamente; no Pix, envie o comprovante para a equipe.
           </p>
           <a class="store-scroll-link" href="#produtos">
             Ver produtos
@@ -64,7 +64,7 @@
             <svg viewBox="0 0 24 24"><path d="M7 9V7a5 5 0 0 1 10 0v2m-12 0h14l-1 12H6L5 9Zm7 5v2" /></svg>
           </div>
           <strong>LOJA RPS</strong>
-          <small>ENTREGA AUTOMÁTICA</small>
+          <small>MV AUTOMÁTICO / PIX MANUAL</small>
           <div class="hero-card-status"><i></i> SISTEMA PROTEGIDO</div>
         </div>
       </section>
@@ -102,12 +102,14 @@
               <li>Até 3 veículos próprios</li>
             </ul>
             <div class="product-price"><small>POR MÊS</small><strong>20.000 <em>MV</em></strong></div>
+            <p class="product-pix-price">OU NO PIX <strong>R$ 19</strong></p>
             <button
               type="button"
               data-plan-select
               data-plan-id="socio-comum"
               data-plan-name="Sócio Comum"
               data-plan-price="20000"
+              data-plan-pix-price="19"
               aria-pressed="false"
             >Escolher plano</button>
           </article>
@@ -124,12 +126,14 @@
               <li>Bônus no payday</li>
             </ul>
             <div class="product-price"><small>POR MÊS</small><strong>22.000 <em>MV</em></strong></div>
+            <p class="product-pix-price">OU NO PIX <strong>R$ 21</strong></p>
             <button
               type="button"
               data-plan-select
               data-plan-id="socio-premium"
               data-plan-name="Sócio Premium"
               data-plan-price="22000"
+              data-plan-pix-price="21"
               aria-pressed="false"
             >Escolher plano</button>
           </article>
@@ -148,12 +152,14 @@
               <li>Caixa bônus</li>
             </ul>
             <div class="product-price"><small>POR MÊS</small><strong>24.000 <em>MV</em></strong></div>
+            <p class="product-pix-price">OU NO PIX <strong>R$ 23</strong></p>
             <button
               type="button"
               data-plan-select
               data-plan-id="socio-diamante"
               data-plan-name="Sócio Diamante"
               data-plan-price="24000"
+              data-plan-pix-price="23"
               aria-pressed="false"
             >Escolher plano</button>
           </article>
@@ -170,12 +176,14 @@
               <li>Destaque verde no chat</li>
             </ul>
             <div class="product-price"><small>POR MÊS</small><strong>27.000 <em>MV</em></strong></div>
+            <p class="product-pix-price">OU NO PIX <strong>R$ 26</strong></p>
             <button
               type="button"
               data-plan-select
               data-plan-id="socio-esmeralda"
               data-plan-name="Sócio Esmeralda"
               data-plan-price="27000"
+              data-plan-pix-price="26"
               aria-pressed="false"
             >Escolher plano</button>
           </article>
@@ -192,12 +200,14 @@
               <li>Prioridade máxima</li>
             </ul>
             <div class="product-price"><small>POR MÊS</small><strong>30.000 <em>MV</em></strong></div>
+            <p class="product-pix-price">OU NO PIX <strong>R$ 29</strong></p>
             <button
               type="button"
               data-plan-select
               data-plan-id="socio-black"
               data-plan-name="Sócio Black"
               data-plan-price="30000"
+              data-plan-pix-price="29"
               aria-pressed="false"
             >Escolher plano</button>
           </article>
@@ -210,10 +220,16 @@
             <span data-selected-price>0 MV</span>
             <small class="purchase-status" data-purchase-status hidden></small>
           </div>
-          <button type="button" data-plan-continue>
-            <span data-plan-continue-label>Conectar personagem</span>
-            <span aria-hidden="true">→</span>
-          </button>
+          <div class="plan-payment-actions">
+            <button type="button" class="payment-mv" data-plan-continue>
+              <span data-plan-continue-label>Conectar personagem</span>
+              <span aria-hidden="true">→</span>
+            </button>
+            <button type="button" class="payment-pix" data-plan-pix>
+              <span data-plan-pix-label>Pagar com Pix</span>
+              <span aria-hidden="true">◇</span>
+            </button>
+          </div>
         </div>
       </section>
 
@@ -225,11 +241,42 @@
         <ol>
           <li><span>01</span><div><strong>Escolha o produto</strong><small>Selecione o pacote que deseja comprar.</small></div></li>
           <li><span>02</span><div><strong>Conecte seu personagem</strong><small>Use o código gerado com o comando /painel.</small></div></li>
-          <li><span>03</span><div><strong>Confirme com MV</strong><small>Confira o plano e seu saldo antes de finalizar.</small></div></li>
-          <li><span>04</span><div><strong>Receba no servidor</strong><small>O benefício será entregue automaticamente.</small></div></li>
+          <li><span>03</span><div><strong>Escolha MV ou Pix</strong><small>Use seu saldo do jogo ou pague o valor indicado no QR Code.</small></div></li>
+          <li><span>04</span><div><strong>Receba no servidor</strong><small>MV é automático. No Pix, envie o comprovante para a equipe.</small></div></li>
         </ol>
       </section>
     </main>
+
+    <div class="pix-modal" data-pix-modal hidden>
+      <div class="pix-modal-backdrop" data-pix-close></div>
+      <section class="pix-dialog" role="dialog" aria-modal="true" aria-labelledby="pix-title">
+        <button class="pix-close" type="button" data-pix-close aria-label="Fechar">×</button>
+        <span class="store-index">PAGAMENTO / PIX</span>
+        <h2 id="pix-title">PAGUE COM<br /><span>PIX.</span></h2>
+        <p class="pix-intro">Escaneie o QR Code, pague o valor exato e envie o comprovante com os dados do pedido.</p>
+        <div class="pix-checkout-grid">
+          <div class="pix-qr-wrap">
+            <img src="pix-qrcode.jpeg" alt="QR Code Pix da Rede Play Stex" width="250" height="250" />
+          </div>
+          <div class="pix-order-summary">
+            <small>PERSONAGEM</small>
+            <strong data-pix-player>--</strong>
+            <small>PLANO</small>
+            <strong data-pix-plan>--</strong>
+            <small>VALOR EXATO</small>
+            <strong class="pix-total" data-pix-price>R$ 0,00</strong>
+            <small>CÓDIGO DO PEDIDO</small>
+            <code data-pix-reference>--</code>
+          </div>
+        </div>
+        <p class="pix-warning">O Pix não é confirmado automaticamente. Guarde o comprovante e somente pague o valor exibido acima.</p>
+        <div class="pix-actions">
+          <button type="button" data-copy-pix-order>Copiar dados do pedido</button>
+          <a href="https://discord.gg/redeplaystex" target="_blank" rel="noreferrer" data-pix-discord>Enviar comprovante no Discord</a>
+        </div>
+        <small class="pix-copy-status" data-pix-copy-status hidden></small>
+      </section>
+    </div>
 
     <footer class="store-footer">
       <div class="store-container store-footer-content">
