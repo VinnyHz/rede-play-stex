@@ -29,6 +29,7 @@ const loginButton = document.querySelector("[data-login-submit]");
 const submitLabel = document.querySelector("[data-submit-label]");
 const formAlert = document.querySelector("[data-form-alert]");
 const logoutButton = document.querySelector("[data-logout]");
+const adminAccessButton = document.querySelector("[data-admin-access]");
 
 document.querySelector("[data-current-year]").textContent = new Date().getFullYear();
 
@@ -150,6 +151,19 @@ const apiRequest = async (path, options = {}) => {
   return data;
 };
 
+const refreshAdminAccess = async () => {
+  adminAccessButton.hidden = true;
+  if (!getPortalToken()) return;
+
+  try {
+    await apiRequest("/api/admin/me");
+    adminAccessButton.hidden = false;
+  } catch {
+    // Jogadores sem permissao administrativa nao veem o acesso ao painel.
+    adminAccessButton.hidden = true;
+  }
+};
+
 const renderDashboard = (player) => {
   const name = String(player.name || "Jogador_RPS");
   const firstName = name.split("_")[0].toUpperCase();
@@ -185,6 +199,7 @@ const renderDashboard = (player) => {
 
   loginView.hidden = true;
   dashboardView.hidden = false;
+  void refreshAdminAccess();
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
@@ -197,6 +212,7 @@ const finishAuthentication = (player) => {
 };
 
 const showLogin = () => {
+  adminAccessButton.hidden = true;
   dashboardView.hidden = true;
   loginView.hidden = false;
 };

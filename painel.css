@@ -463,6 +463,34 @@
   letter-spacing: 0.1em;
 }
 
+.admin-button {
+  display: inline-flex;
+  height: 48px;
+  align-items: center;
+  padding: 0 14px 0 18px;
+  color: #07111f;
+  border: 1px solid var(--portal-blue);
+  border-radius: 9px;
+  background: var(--portal-blue);
+  font: 700 9px/1 "Space Grotesk", sans-serif;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+}
+
+.admin-button[hidden] {
+  display: none;
+}
+
+.admin-button span {
+  margin-left: 16px;
+  font-size: 14px;
+}
+
+.admin-button:hover {
+  color: white;
+  background: #326fd9;
+}
+
 .logout-button span {
   margin-left: 16px;
   color: var(--portal-blue);
@@ -988,6 +1016,7 @@
 
   .dashboard-actions {
     width: 100%;
+    flex-wrap: wrap;
     justify-content: space-between;
   }
 
