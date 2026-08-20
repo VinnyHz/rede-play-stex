@@ -8,10 +8,7 @@
     <title>Painel restrito — Rede Play Stex</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="admin.css" />
   </head>
   <body>
@@ -39,8 +36,8 @@
       <section class="admin-dashboard" data-admin-dashboard hidden>
         <div class="dashboard-heading">
           <div>
-            <p class="eyebrow">ADMINISTRAÇÃO / PIX</p>
-            <h1>PEDIDOS<br /><span>PENDENTES.</span></h1>
+            <p class="eyebrow">ADMINISTRAÇÃO / SERVIDOR</p>
+            <h1>CONTROLE<br /><span>SEGURO.</span></h1>
           </div>
           <div class="admin-identity">
             <small>ADMINISTRADOR AUTORIZADO</small>
@@ -49,31 +46,106 @@
           </div>
         </div>
 
-        <div class="admin-toolbar">
-          <label>
-            <span>FILTRAR PEDIDOS</span>
-            <select data-order-filter>
-              <option value="awaiting_payment">Aguardando conferência</option>
-              <option value="queued">Aprovados / aguardando jogo</option>
-              <option value="processing">Em entrega</option>
-              <option value="completed">Concluídos</option>
-              <option value="rejected">Recusados</option>
-              <option value="failed">Falhas</option>
-              <option value="">Todos</option>
-            </select>
-          </label>
-          <button type="button" class="refresh-button" data-refresh-orders>Atualizar agora</button>
-        </div>
-
-        <div class="admin-warning">
-          <strong>Antes de aprovar</strong>
-          <p>Confira o recebimento diretamente no aplicativo da Caixa. Um comprovante enviado pelo jogador pode ser falso.</p>
-        </div>
+        <nav class="admin-tabs" aria-label="Seções administrativas">
+          <button type="button" class="is-active" data-admin-tab="accounts">Contas do site</button>
+          <button type="button" data-admin-tab="pix">Pedidos Pix</button>
+        </nav>
 
         <div class="admin-feedback" role="status" data-admin-feedback hidden></div>
-        <div class="orders-grid" data-orders-list aria-live="polite"></div>
+
+        <section class="admin-view" data-admin-view="accounts">
+          <div class="view-heading">
+            <div>
+              <p class="eyebrow">JOGADORES / CONTAS</p>
+              <h2>Quem já entrou pelo site</h2>
+              <p>Pesquise uma conta e envie alterações seguras para o servidor.</p>
+            </div>
+          </div>
+
+          <div class="admin-toolbar account-toolbar">
+            <label>
+              <span>PESQUISAR PERSONAGEM</span>
+              <input type="search" placeholder="Ex.: Vinny_Stex" maxlength="48" data-account-search />
+            </label>
+            <button type="button" class="refresh-button" data-refresh-accounts>Atualizar contas</button>
+          </div>
+
+          <div class="admin-warning account-warning">
+            <strong>Alteração segura</strong>
+            <p>Se o jogador estiver offline, a mudança ficará aguardando e será aplicada automaticamente quando ele entrar no servidor.</p>
+          </div>
+
+          <div class="accounts-grid" data-accounts-list aria-live="polite"></div>
+        </section>
+
+        <section class="admin-view" data-admin-view="pix" hidden>
+          <div class="view-heading">
+            <div>
+              <p class="eyebrow">LOJA / PAGAMENTOS</p>
+              <h2>Pedidos Pix</h2>
+              <p>Confira os pagamentos e libere as compras para entrega no jogo.</p>
+            </div>
+          </div>
+
+          <div class="admin-toolbar">
+            <label>
+              <span>FILTRAR PEDIDOS</span>
+              <select data-order-filter>
+                <option value="awaiting_payment">Aguardando conferência</option>
+                <option value="queued">Aprovados / aguardando jogo</option>
+                <option value="processing">Em entrega</option>
+                <option value="completed">Concluídos</option>
+                <option value="rejected">Recusados</option>
+                <option value="failed">Falhas</option>
+                <option value="">Todos</option>
+              </select>
+            </label>
+            <button type="button" class="refresh-button" data-refresh-orders>Atualizar pedidos</button>
+          </div>
+
+          <div class="admin-warning">
+            <strong>Antes de aprovar</strong>
+            <p>Confira o recebimento diretamente no aplicativo da Caixa. Um comprovante enviado pelo jogador pode ser falso.</p>
+          </div>
+
+          <div class="orders-grid" data-orders-list aria-live="polite"></div>
+        </section>
       </section>
     </main>
+
+    <dialog class="account-dialog" data-account-dialog>
+      <form method="dialog" data-account-form>
+        <div class="dialog-heading">
+          <div>
+            <p class="eyebrow">EDITAR CONTA</p>
+            <h2 data-edit-account-name>--</h2>
+            <small data-edit-account-id>--</small>
+          </div>
+          <button type="button" class="dialog-close" data-close-account-dialog aria-label="Fechar">×</button>
+        </div>
+
+        <p class="dialog-note">Altere somente os campos necessários. A mudança será entregue e salva pelo próprio servidor.</p>
+
+        <div class="account-fields">
+          <label><span>Dinheiro em mãos</span><input name="cash" type="number" min="0" max="2000000000" required /></label>
+          <label><span>Saldo bancário</span><input name="bank" type="number" min="0" max="2000000000" required /></label>
+          <label><span>Moedas MV</span><input name="vipCoins" type="number" min="0" max="2000000000" required /></label>
+          <label><span>Fichas RPS</span><input name="rpsTokens" type="number" min="0" max="100" required /></label>
+          <label><span>Nível</span><input name="level" type="number" min="1" max="1000000" required /></label>
+          <label><span>Experiência</span><input name="exp" type="number" min="0" max="2000000000" required /></label>
+          <label><span>Skin (0–311)</span><input name="skin" type="number" min="0" max="311" required /></label>
+          <label><span>Procurado (0–6)</span><input name="wanted" type="number" min="0" max="6" required /></label>
+          <label><span>Abates</span><input name="kills" type="number" min="0" max="2000000000" required /></label>
+          <label><span>Mortes</span><input name="deaths" type="number" min="0" max="2000000000" required /></label>
+          <label><span>Minutos jogados</span><input name="minutes" type="number" min="0" max="2000000000" required /></label>
+        </div>
+
+        <div class="dialog-actions">
+          <button type="button" class="cancel" data-close-account-dialog>Cancelar</button>
+          <button type="submit" class="save">Enviar alterações ao jogo</button>
+        </div>
+      </form>
+    </dialog>
 
     <script src="admin.js"></script>
   </body>
