@@ -30,6 +30,7 @@ const submitLabel = document.querySelector("[data-submit-label]");
 const formAlert = document.querySelector("[data-form-alert]");
 const logoutButton = document.querySelector("[data-logout]");
 const adminAccessButton = document.querySelector("[data-admin-access]");
+const rewardsCommandButton = document.querySelector("[data-copy-rewards-command]");
 
 document.querySelector("[data-current-year]").textContent = new Date().getFullYear();
 
@@ -172,6 +173,7 @@ const renderDashboard = (player) => {
   const deaths = Math.max(Number(player.deaths) || 0, 0);
   const kills = Math.max(Number(player.kills) || 0, 0);
   const vipLevel = Math.max(Number(player.vipLevel) || 0, 0);
+  const rpsTokens = Math.min(Math.max(Number(player.rpsTokens) || 0, 0), 100);
   const vip = vipPlans[vipLevel] || [`VIP Nível ${vipLevel}`, "Seu plano VIP está ativo no servidor."];
 
   setText("[data-player-first-name]", firstName);
@@ -184,6 +186,7 @@ const renderDashboard = (player) => {
   setText("[data-cash]", formatMoney(player.cash));
   setText("[data-bank]", formatMoney(player.bank));
   setText("[data-vip-coins]", formatNumber(player.vipCoins));
+  setText("[data-rps-tokens]", formatNumber(rpsTokens));
   setText("[data-play-time]", formatPlayTime(player.minutes));
   setText("[data-kills]", formatNumber(kills));
   setText("[data-deaths]", formatNumber(deaths));
@@ -197,11 +200,27 @@ const renderDashboard = (player) => {
   const progress = document.querySelector("[data-level-progress]");
   if (progress) progress.style.width = `${Math.min((exp % 100), 100)}%`;
 
+  const rewardsProgress = document.querySelector("[data-rps-token-progress]");
+  if (rewardsProgress) rewardsProgress.style.width = `${rpsTokens}%`;
+
   loginView.hidden = true;
   dashboardView.hidden = false;
   void refreshAdminAccess();
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
+
+rewardsCommandButton?.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText("/fichas");
+    const originalText = rewardsCommandButton.innerHTML;
+    rewardsCommandButton.textContent = "Comando copiado!";
+    window.setTimeout(() => {
+      rewardsCommandButton.innerHTML = originalText;
+    }, 1800);
+  } catch {
+    rewardsCommandButton.textContent = "Use /fichas no jogo";
+  }
+});
 
 const finishAuthentication = (player) => {
   if (safeReturnPage) {
