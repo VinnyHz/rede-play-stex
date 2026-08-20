@@ -1,6 +1,7 @@
 const PORTAL_CONFIG = {
   apiUrl: "https://rede-play-stex-api.vinny-fernandessoares.workers.dev",
   tokenKey: "rps_portal_session",
+  activeRewardOrderKey: "rps_active_reward_order",
 };
 
 const requestedReturn = new URLSearchParams(window.location.search).get("return");
@@ -17,6 +18,7 @@ const savePortalToken = (token) => {
 const clearPortalToken = () => {
   localStorage.removeItem(PORTAL_CONFIG.tokenKey);
   sessionStorage.removeItem(PORTAL_CONFIG.tokenKey);
+  localStorage.removeItem(PORTAL_CONFIG.activeRewardOrderKey);
 };
 
 const previousTabToken = sessionStorage.getItem(PORTAL_CONFIG.tokenKey);
@@ -30,7 +32,16 @@ const submitLabel = document.querySelector("[data-submit-label]");
 const formAlert = document.querySelector("[data-form-alert]");
 const logoutButton = document.querySelector("[data-logout]");
 const adminAccessButton = document.querySelector("[data-admin-access]");
-const rewardsCommandButton = document.querySelector("[data-copy-rewards-command]");
+const openRewardsButton = document.querySelector("[data-open-rewards]");
+const rewardsModal = document.querySelector("[data-rewards-modal]");
+const closeRewardsButtons = [...document.querySelectorAll("[data-close-rewards]")];
+const rewardsModalBalance = document.querySelector("[data-rewards-modal-balance]");
+const rewardsStatus = document.querySelector("[data-rewards-status]");
+const rewardOptions = [...document.querySelectorAll("[data-reward-select]")];
+
+let connectedPlayer = null;
+let rewardOrderInProgress = false;
+let rewardOrderPolling = false;
 
 document.querySelector("[data-current-year]").textContent = new Date().getFullYear();
 
@@ -152,6 +163,146 @@ const apiRequest = async (path, options = {}) => {
   return data;
 };
 
+const setRewardsStatus = (message = "", type = "") => {
+  if (!rewardsStatus) return;
+  rewardsStatus.textContent = message;
+  rewardsStatus.hidden = !message;
+  rewardsStatus.classList.toggle("is-error", type === "error");
+  rewardsStatus.classList.toggle("is-success", type === "success");
+};
+
+const updateRewardOptions = (balance = connectedPlayer?.rpsTokens) => {
+  const availableTokens = Math.min(Math.max(Number(balance) || 0, 0), 100);
+  if (rewardsModalBalance) rewardsModalBalance.textContent = formatNumber(availableTokens);
+
+  rewardOptions.forEach((button) => {
+    const cost = Number(button.dataset.rewardCost) || 0;
+    const unavailable = cost > availableTokens;
+    button.disabled = rewardOrderInProgress || unavailable;
+    button.title = rewardOrderInProgress
+      ? "Aguarde a entrega do pedido atual."
+      : unavailable
+        ? `Faltam ${cost - availableTokens} fichas.`
+        : `Trocar ${cost} fichas por ${button.dataset.rewardName}.`;
+  });
+};
+
+const openRewardsModal = () => {
+  if (!rewardsModal || !connectedPlayer) return;
+  updateRewardOptions();
+  rewardsModal.hidden = false;
+  document.body.classList.add("is-modal-open");
+};
+
+const closeRewardsModal = () => {
+  if (!rewardsModal) return;
+  rewardsModal.hidden = true;
+  document.body.classList.remove("is-modal-open");
+};
+
+const rewardFailureMessages = {
+  invalid_reward: "Essa recompensa nÃ£o existe mais.",
+  insufficient_tokens: "VocÃª nÃ£o possui fichas suficientes.",
+  inventory_full: "Seu inventÃ¡rio estÃ¡ cheio. Libere um espaÃ§o e tente novamente.",
+  save_failed: "O servidor nÃ£o conseguiu salvar a entrega. Tente novamente.",
+  invalid_order: "O pedido recebido pelo servidor era invÃ¡lido.",
+};
+
+const refreshConnectedPlayer = async () => {
+  const result = await apiRequest("/api/me");
+  renderDashboard(result.player);
+  return result.player;
+};
+
+const pollRewardOrder = async (orderId) => {
+  if (rewardOrderPolling || !Number.isInteger(orderId) || orderId <= 0) return;
+
+  rewardOrderPolling = true;
+  rewardOrderInProgress = true;
+  updateRewardOptions();
+  setRewardsStatus("Pedido criado. Entre no servidor e mantenha seu personagem conectado para receber o item.");
+
+  try {
+    for (let attempt = 0; attempt < 120; attempt += 1) {
+      const result = await apiRequest(`/api/rewards/redemptions/${orderId}`);
+      const order = result.order || {};
+
+      if (order.status === "completed") {
+        localStorage.removeItem(PORTAL_CONFIG.activeRewardOrderKey);
+        rewardOrderInProgress = false;
+        rewardOrderPolling = false;
+        await refreshConnectedPlayer();
+        setRewardsStatus(`${order.planName || "Recompensa"} foi entregue no seu inventÃ¡rio!`, "success");
+        return;
+      }
+
+      if (order.status === "failed") {
+        localStorage.removeItem(PORTAL_CONFIG.activeRewardOrderKey);
+        rewardOrderInProgress = false;
+        rewardOrderPolling = false;
+        await refreshConnectedPlayer();
+        setRewardsStatus(
+          rewardFailureMessages[order.failureReason] || "O jogo nÃ£o conseguiu entregar esse item. Tente novamente.",
+          "error",
+        );
+        return;
+      }
+
+      await new Promise((resolve) => window.setTimeout(resolve, 4000));
+    }
+
+    setRewardsStatus("O pedido continua salvo. Entre no servidor; o painel confirmarÃ¡ a entrega quando vocÃª voltar.");
+  } catch (error) {
+    setRewardsStatus(error.message || "NÃ£o foi possÃ­vel consultar a entrega agora.", "error");
+  } finally {
+    rewardOrderPolling = false;
+    rewardOrderInProgress = false;
+    updateRewardOptions();
+  }
+};
+
+const redeemReward = async (button) => {
+  if (!connectedPlayer || rewardOrderInProgress) return;
+
+  const rewardId = button.dataset.rewardSelect;
+  const rewardName = button.dataset.rewardName || "este item";
+  const cost = Number(button.dataset.rewardCost) || 0;
+  const balance = Number(connectedPlayer.rpsTokens) || 0;
+
+  if (balance < cost) {
+    setRewardsStatus(`VocÃª precisa de mais ${cost - balance} fichas para trocar por ${rewardName}.`, "error");
+    return;
+  }
+
+  if (!window.confirm(`Trocar ${cost} fichas por ${rewardName}? O item serÃ¡ entregue no inventÃ¡rio do jogo.`)) return;
+
+  rewardOrderInProgress = true;
+  updateRewardOptions();
+  setRewardsStatus("Criando seu pedido...");
+
+  try {
+    const result = await apiRequest("/api/rewards/redemptions", {
+      method: "POST",
+      body: JSON.stringify({ rewardId }),
+    });
+    const orderId = Number(result.order?.orderId);
+    if (!Number.isInteger(orderId) || orderId <= 0) throw new Error("A API nÃ£o retornou um pedido vÃ¡lido.");
+
+    localStorage.setItem(PORTAL_CONFIG.activeRewardOrderKey, String(orderId));
+    rewardOrderInProgress = false;
+    await pollRewardOrder(orderId);
+  } catch (error) {
+    rewardOrderInProgress = false;
+    updateRewardOptions();
+    setRewardsStatus(error.message || "NÃ£o foi possÃ­vel criar o pedido.", "error");
+  }
+};
+
+const resumeRewardOrder = () => {
+  const orderId = Number(localStorage.getItem(PORTAL_CONFIG.activeRewardOrderKey));
+  if (Number.isInteger(orderId) && orderId > 0 && !rewardOrderPolling) void pollRewardOrder(orderId);
+};
+
 const refreshAdminAccess = async () => {
   adminAccessButton.hidden = true;
   if (!getPortalToken()) return;
@@ -166,6 +317,7 @@ const refreshAdminAccess = async () => {
 };
 
 const renderDashboard = (player) => {
+  connectedPlayer = player;
   const name = String(player.name || "Jogador_RPS");
   const firstName = name.split("_")[0].toUpperCase();
   const level = Math.max(Number(player.level) || 1, 1);
@@ -202,24 +354,20 @@ const renderDashboard = (player) => {
 
   const rewardsProgress = document.querySelector("[data-rps-token-progress]");
   if (rewardsProgress) rewardsProgress.style.width = `${rpsTokens}%`;
+  updateRewardOptions(rpsTokens);
 
   loginView.hidden = true;
   dashboardView.hidden = false;
   void refreshAdminAccess();
+  resumeRewardOrder();
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
-rewardsCommandButton?.addEventListener("click", async () => {
-  try {
-    await navigator.clipboard.writeText("/fichas");
-    const originalText = rewardsCommandButton.innerHTML;
-    rewardsCommandButton.textContent = "Comando copiado!";
-    window.setTimeout(() => {
-      rewardsCommandButton.innerHTML = originalText;
-    }, 1800);
-  } catch {
-    rewardsCommandButton.textContent = "Use /fichas no jogo";
-  }
+openRewardsButton?.addEventListener("click", openRewardsModal);
+closeRewardsButtons.forEach((button) => button.addEventListener("click", closeRewardsModal));
+rewardOptions.forEach((button) => button.addEventListener("click", () => void redeemReward(button)));
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && rewardsModal && !rewardsModal.hidden) closeRewardsModal();
 });
 
 const finishAuthentication = (player) => {
@@ -231,6 +379,8 @@ const finishAuthentication = (player) => {
 };
 
 const showLogin = () => {
+  connectedPlayer = null;
+  closeRewardsModal();
   adminAccessButton.hidden = true;
   dashboardView.hidden = true;
   loginView.hidden = false;

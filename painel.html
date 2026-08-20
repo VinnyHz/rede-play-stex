@@ -14,7 +14,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="painel.css?v=2" />
+    <link rel="stylesheet" href="painel.css?v=3" />
   </head>
   <body class="portal-body">
     <div class="noise" aria-hidden="true"></div>
@@ -234,8 +234,8 @@
             </div>
             <div class="rewards-footer">
               <p>Ganhe <b>2 fichas</b> a cada hora jogada e troque por acessorios exclusivos.</p>
-              <button type="button" data-copy-rewards-command>
-                Usar /fichas no jogo <b>â†—</b>
+              <button type="button" data-open-rewards>
+                Trocar fichas <b>↗</b>
               </button>
             </div>
           </article>
@@ -247,6 +247,52 @@
       </section>
     </main>
 
+    <div class="rewards-modal" data-rewards-modal hidden>
+      <button class="rewards-modal-backdrop" type="button" data-close-rewards aria-label="Fechar catálogo"></button>
+      <section class="rewards-shop" role="dialog" aria-modal="true" aria-labelledby="rewards-shop-title">
+        <header class="rewards-shop-head">
+          <div>
+            <span>LOJA DE RECOMPENSAS</span>
+            <h2 id="rewards-shop-title">Troque suas Fichas RPS</h2>
+            <p>Escolha um item. A entrega será feita no inventário do seu personagem.</p>
+          </div>
+          <button type="button" data-close-rewards aria-label="Fechar">×</button>
+        </header>
+
+        <div class="rewards-shop-balance">
+          <span>SEU SALDO</span>
+          <strong><b data-rewards-modal-balance>0</b> / 100 fichas</strong>
+        </div>
+
+        <div class="rewards-catalog">
+          <button class="reward-option" type="button" data-reward-select="oculos-escuros" data-reward-name="Óculos escuros" data-reward-cost="10">
+            <span class="reward-option-icon">OE</span><strong>Óculos escuros</strong><small>Acessório visual</small><b>10 fichas</b>
+          </button>
+          <button class="reward-option" type="button" data-reward-select="oculos-vermelho" data-reward-name="Óculos vermelho" data-reward-cost="15">
+            <span class="reward-option-icon">OV</span><strong>Óculos vermelho</strong><small>Acessório visual</small><b>15 fichas</b>
+          </button>
+          <button class="reward-option" type="button" data-reward-select="bone-casual" data-reward-name="Boné casual" data-reward-cost="25">
+            <span class="reward-option-icon">BC</span><strong>Boné casual</strong><small>Acessório de cabeça</small><b>25 fichas</b>
+          </button>
+          <button class="reward-option" type="button" data-reward-select="chapeu-preto" data-reward-name="Chapéu preto" data-reward-cost="30">
+            <span class="reward-option-icon">CP</span><strong>Chapéu preto</strong><small>Acessório de cabeça</small><b>30 fichas</b>
+          </button>
+          <button class="reward-option" type="button" data-reward-select="bandana" data-reward-name="Bandana" data-reward-cost="40">
+            <span class="reward-option-icon">BA</span><strong>Bandana</strong><small>Acessório visual</small><b>40 fichas</b>
+          </button>
+          <button class="reward-option" type="button" data-reward-select="capacete" data-reward-name="Capacete" data-reward-cost="55">
+            <span class="reward-option-icon">CA</span><strong>Capacete</strong><small>Acessório de cabeça</small><b>55 fichas</b>
+          </button>
+          <button class="reward-option reward-option-featured" type="button" data-reward-select="fogueira" data-reward-name="Fogueira" data-reward-cost="100">
+            <span class="reward-option-icon">FO</span><strong>Fogueira</strong><small>Item especial</small><b>100 fichas</b>
+          </button>
+        </div>
+
+        <p class="rewards-shop-status" data-rewards-status hidden></p>
+        <p class="rewards-shop-note">Para receber o item, entre no servidor com este personagem e deixe espaço livre no inventário.</p>
+      </section>
+    </div>
+
     <footer class="portal-footer">
       <div class="portal-container">
         <span>© <span data-current-year></span> REDE PLAY STEX</span>
@@ -254,6 +300,6 @@
       </div>
     </footer>
 
-    <script src="painel.js?v=2"></script>
+    <script src="painel.js?v=3"></script>
   </body>
 </html>
