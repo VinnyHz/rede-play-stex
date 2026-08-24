@@ -40,8 +40,14 @@ const orderFilter = document.querySelector("[data-order-filter]");
 const refreshOrdersButton = document.querySelector("[data-refresh-orders]");
 const ordersList = document.querySelector("[data-orders-list]");
 
+const couponForm = document.querySelector("[data-coupon-form]");
+const createCouponButton = document.querySelector("[data-create-coupon]");
+const refreshCouponsButton = document.querySelector("[data-refresh-coupons]");
+const couponsList = document.querySelector("[data-coupons-list]");
+
 let activeView = "accounts";
 let accounts = [];
+let coupons = [];
 let editingAccount = null;
 let refreshTimer = 0;
 let searchTimer = 0;
@@ -134,9 +140,13 @@ const statusLabels = {
 const setLoadingState = () => {
   refreshAccountsButton.disabled = loading;
   refreshOrdersButton.disabled = loading;
+  refreshCouponsButton.disabled = loading;
+  createCouponButton.disabled = loading;
   accountsList.querySelectorAll("button").forEach((button) => { button.disabled = loading; });
   ordersList.querySelectorAll("button").forEach((button) => { button.disabled = loading; });
+  couponsList.querySelectorAll("button").forEach((button) => { button.disabled = loading; });
   accountForm.querySelectorAll("button, input").forEach((element) => { element.disabled = loading; });
+  couponForm.querySelectorAll("button, input").forEach((element) => { element.disabled = loading; });
 };
 
 const appendField = (card, label, value, className = "") => {
@@ -304,12 +314,43 @@ const submitAccountChanges = async (event) => {
   }
 };
 
+const isMvPixOrder = (order) => {
+  const kind = String(order?.orderType ?? order?.kind ?? order?.productType ?? "").toLowerCase();
+  return kind === "mv" || kind === "vip_coins" || Number(order?.mvAmount ?? order?.vipCoinsAmount) > 0;
+};
+
+const orderMvAmount = (order) => Number(order?.mvAmount ?? order?.vipCoinsAmount ?? 0) || 0;
+const orderCouponCode = (order) => String(order?.couponCode ?? order?.coupon?.code ?? "").trim().toUpperCase();
+const orderCouponPercent = (order) => Number(
+  order?.couponPercent ?? order?.discountPercent ?? order?.coupon?.discountPercent ?? 0
+) || 0;
+const orderDiscountCents = (order) => Math.max(
+  0,
+  Number(order?.discountCents ?? order?.discountAmountCents ?? 0) || 0
+);
+
+const orderProductLabel = (order) => isMvPixOrder(order)
+  ? `${formatNumber(orderMvAmount(order))} MV`
+  : (order.planName || "--");
+
+const orderCouponLabel = (order) => {
+  if (!isMvPixOrder(order)) return "Não se aplica";
+  const code = orderCouponCode(order);
+  if (!code) return "Sem cupom";
+  const percent = orderCouponPercent(order);
+  const discount = orderDiscountCents(order);
+  if (percent > 0) return `${code} (−${percent}%)`;
+  if (discount > 0) return `${code} (−${formatPix(discount)})`;
+  return code;
+};
+
 const reviewOrder = async (order, action) => {
   if (loading) return;
   let reason = "";
   if (action === "approve") {
+    const delivery = isMvPixOrder(order) ? "as moedas MV" : "o plano";
     const confirmed = window.confirm(
-      `Você conferiu na conta da Caixa o recebimento de ${formatPix(order.pixAmountCents)} para o pedido ${order.orderId}?\n\nAprovar vai liberar o plano no jogo.`
+      `Você conferiu na conta da Caixa o recebimento de ${formatPix(order.pixAmountCents)} para o pedido ${order.orderId}?\n\nAprovar vai liberar ${delivery} no jogo.`
     );
     if (!confirmed) return;
   } else {
@@ -361,7 +402,8 @@ const renderOrders = (orders) => {
     main.append(label, player, reference);
     card.append(main);
 
-    appendField(card, "PLANO", order.planName || "--");
+    appendField(card, "PRODUTO", orderProductLabel(order), "order-product");
+    appendField(card, "CUPOM", orderCouponLabel(order), "order-coupon");
     appendField(card, "VALOR EXATO", formatPix(order.pixAmountCents), "order-price");
     appendField(card, "CRIADO EM", formatDate(order.createdAt));
     const status = appendField(card, "STATUS", statusLabels[order.status] || order.status, "order-state");
@@ -412,15 +454,175 @@ const loadOrders = async () => {
   }
 };
 
+const normalizeFlag = (value) => value === true || value === 1 || value === "1" || value === "true";
+
+const normalizeCoupon = (coupon) => ({
+  couponId: Number(coupon?.couponId ?? coupon?.id ?? 0) || 0,
+  code: String(coupon?.code ?? "").trim().toUpperCase(),
+  discountPercent: Number(coupon?.discountPercent ?? coupon?.percent ?? 0) || 0,
+  expiresAt: Number(coupon?.expiresAt ?? coupon?.expires_at ?? 0) || 0,
+  active: normalizeFlag(coupon?.active ?? coupon?.isActive ?? coupon?.enabled),
+  createdAt: Number(coupon?.createdAt ?? coupon?.created_at ?? 0) || 0,
+  useCount: Number(coupon?.useCount ?? coupon?.uses ?? coupon?.timesUsed ?? 0) || 0,
+});
+
+const renderCoupons = (items) => {
+  couponsList.replaceChildren();
+  if (!items.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty-orders";
+    empty.textContent = "Nenhum cupom de MV foi criado ainda.";
+    couponsList.append(empty);
+    return;
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  items.forEach((coupon) => {
+    const expired = coupon.expiresAt > 0 && coupon.expiresAt <= now;
+    const card = document.createElement("article");
+    card.className = "coupon-card";
+
+    const heading = document.createElement("div");
+    heading.className = "coupon-card-heading";
+    const code = document.createElement("code");
+    code.className = "coupon-code";
+    code.textContent = coupon.code || "SEM-CÓDIGO";
+    const state = document.createElement("span");
+    state.className = "coupon-state";
+    if (expired) {
+      state.classList.add("is-expired");
+      state.textContent = "Expirado";
+    } else if (!coupon.active) {
+      state.classList.add("is-inactive");
+      state.textContent = "Desativado";
+    } else {
+      state.textContent = "Ativo";
+    }
+    heading.append(code, state);
+    card.append(heading);
+
+    const stats = document.createElement("div");
+    stats.className = "coupon-stats";
+    appendField(stats, "DESCONTO", `${formatNumber(coupon.discountPercent)}%`);
+    appendField(stats, "VÁLIDO ATÉ", formatDate(coupon.expiresAt));
+    appendField(stats, "USOS", formatNumber(coupon.useCount));
+    card.append(stats);
+
+    const footer = document.createElement("div");
+    footer.className = "coupon-card-footer";
+    const created = document.createElement("small");
+    created.textContent = `Criado em ${formatDate(coupon.createdAt)}`;
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "coupon-toggle";
+    toggle.classList.toggle("is-enable", !coupon.active);
+    toggle.textContent = coupon.active ? "Desativar cupom" : "Ativar cupom";
+    toggle.disabled = loading || !coupon.couponId;
+    toggle.addEventListener("click", () => toggleCoupon(coupon));
+    footer.append(created, toggle);
+    card.append(footer);
+
+    couponsList.append(card);
+  });
+  setLoadingState();
+};
+
+const loadCoupons = async () => {
+  window.clearTimeout(refreshTimer);
+  try {
+    const result = await apiRequest("/api/admin/mv-coupons");
+    coupons = (result.coupons || []).map(normalizeCoupon);
+    renderCoupons(coupons);
+    if (activeView === "coupons") refreshTimer = window.setTimeout(loadCoupons, 20000);
+  } catch (error) {
+    if (handleAccessError(error)) return;
+    setFeedback(error.message, true);
+    if (activeView === "coupons") refreshTimer = window.setTimeout(loadCoupons, 25000);
+  }
+};
+
+const submitCoupon = async (event) => {
+  event.preventDefault();
+  if (loading || !couponForm.reportValidity()) return;
+
+  const code = String(couponForm.elements.code.value).trim().toUpperCase();
+  const discountPercent = Number(couponForm.elements.discountPercent.value);
+  const expiresAt = Math.floor(new Date(couponForm.elements.expiresAt.value).getTime() / 1000);
+  if (!Number.isFinite(expiresAt) || expiresAt <= Math.floor(Date.now() / 1000)) {
+    setFeedback("Escolha uma data de expiração futura para o cupom.", true);
+    couponForm.elements.expiresAt.focus();
+    return;
+  }
+
+  loading = true;
+  setFeedback(`Criando o cupom ${code}...`);
+  setLoadingState();
+  try {
+    const result = await apiRequest("/api/admin/mv-coupons", {
+      method: "POST",
+      body: JSON.stringify({ code, discountPercent, expiresAt }),
+    });
+    couponForm.reset();
+    setCouponDateBounds();
+    setFeedback(result.message || `Cupom ${code} criado com sucesso.`);
+    await loadCoupons();
+  } catch (error) {
+    if (!handleAccessError(error)) setFeedback(error.message, true);
+  } finally {
+    loading = false;
+    setLoadingState();
+  }
+};
+
+async function toggleCoupon(coupon) {
+  if (loading || !coupon.couponId) return;
+  const active = !coupon.active;
+  const action = active ? "ativar" : "desativar";
+  if (!window.confirm(`Deseja ${action} o cupom ${coupon.code}?`)) return;
+
+  loading = true;
+  setFeedback(`${active ? "Ativando" : "Desativando"} o cupom ${coupon.code}...`);
+  setLoadingState();
+  try {
+    const result = await apiRequest(`/api/admin/mv-coupons/${coupon.couponId}/toggle`, {
+      method: "POST",
+      body: JSON.stringify({ active }),
+    });
+    setFeedback(result.message || `Cupom ${coupon.code} ${active ? "ativado" : "desativado"}.`);
+    await loadCoupons();
+  } catch (error) {
+    if (!handleAccessError(error)) setFeedback(error.message, true);
+  } finally {
+    loading = false;
+    setLoadingState();
+  }
+}
+
+const toDatetimeLocalValue = (date) => {
+  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return localDate.toISOString().slice(0, 16);
+};
+
+const setCouponDateBounds = () => {
+  const expiresInput = couponForm.elements.expiresAt;
+  const now = new Date();
+  expiresInput.min = toDatetimeLocalValue(now);
+  if (!expiresInput.value) {
+    const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    expiresInput.value = toDatetimeLocalValue(nextWeek);
+  }
+};
+
 const switchView = async (viewName) => {
-  if (!['accounts', 'pix'].includes(viewName)) return;
+  if (!["accounts", "pix", "coupons"].includes(viewName)) return;
   window.clearTimeout(refreshTimer);
   activeView = viewName;
   tabs.forEach((tab) => tab.classList.toggle("is-active", tab.dataset.adminTab === viewName));
   views.forEach((view) => { view.hidden = view.dataset.adminView !== viewName; });
   setFeedback();
   if (viewName === "accounts") await loadAccounts();
-  else await loadOrders();
+  else if (viewName === "pix") await loadOrders();
+  else await loadCoupons();
 };
 
 const initializeAdmin = async () => {
@@ -444,11 +646,17 @@ tabs.forEach((tab) => tab.addEventListener("click", () => switchView(tab.dataset
 orderFilter.addEventListener("change", loadOrders);
 refreshOrdersButton.addEventListener("click", loadOrders);
 refreshAccountsButton.addEventListener("click", loadAccounts);
+refreshCouponsButton.addEventListener("click", loadCoupons);
 accountSearch.addEventListener("input", () => {
   window.clearTimeout(searchTimer);
   searchTimer = window.setTimeout(loadAccounts, 350);
 });
 accountForm.addEventListener("submit", submitAccountChanges);
+couponForm.addEventListener("submit", submitCoupon);
+couponForm.elements.code.addEventListener("input", () => {
+  const input = couponForm.elements.code;
+  input.value = input.value.toUpperCase().replace(/[^A-Z0-9_-]/g, "");
+});
 document.querySelectorAll("[data-close-account-dialog]").forEach((button) => {
   button.addEventListener("click", closeAccountEditor);
 });
@@ -460,4 +668,5 @@ logoutButton.addEventListener("click", () => {
   window.location.replace("painel.html");
 });
 
+setCouponDateBounds();
 initializeAdmin();

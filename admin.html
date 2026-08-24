@@ -49,6 +49,7 @@
         <nav class="admin-tabs" aria-label="Seções administrativas">
           <button type="button" class="is-active" data-admin-tab="accounts">Contas do site</button>
           <button type="button" data-admin-tab="pix">Pedidos Pix</button>
+          <button type="button" data-admin-tab="coupons">Cupons MV</button>
         </nav>
 
         <div class="admin-feedback" role="status" data-admin-feedback hidden></div>
@@ -109,6 +110,52 @@
           </div>
 
           <div class="orders-grid" data-orders-list aria-live="polite"></div>
+        </section>
+
+        <section class="admin-view" data-admin-view="coupons" hidden>
+          <div class="view-heading">
+            <div>
+              <p class="eyebrow">LOJA / CUPONS</p>
+              <h2>Cupons para compra de MV</h2>
+              <p>Crie descontos que funcionam exclusivamente na recarga de moedas MV.</p>
+            </div>
+          </div>
+
+          <form class="coupon-create-form" data-coupon-form>
+            <label>
+              <span>CÓDIGO DO CUPOM</span>
+              <input
+                name="code"
+                type="text"
+                minlength="3"
+                maxlength="24"
+                pattern="[A-Za-z0-9_-]{3,24}"
+                placeholder="Ex.: RPS10"
+                autocomplete="off"
+                required
+              />
+            </label>
+            <label>
+              <span>DESCONTO (%)</span>
+              <input name="discountPercent" type="number" min="1" max="90" step="1" placeholder="10" required />
+            </label>
+            <label>
+              <span>VÁLIDO ATÉ</span>
+              <input name="expiresAt" type="datetime-local" required />
+            </label>
+            <button type="submit" class="create-coupon-button" data-create-coupon>Criar cupom</button>
+          </form>
+
+          <div class="admin-warning coupon-warning">
+            <strong>Uso exclusivo</strong>
+            <p>Esses cupons reduzem apenas o valor em Pix da compra de MV. Eles não alteram o preço dos planos de Sócio.</p>
+          </div>
+
+          <div class="coupon-list-heading">
+            <span>Cupons cadastrados</span>
+            <button type="button" class="refresh-button" data-refresh-coupons>Atualizar cupons</button>
+          </div>
+          <div class="coupons-grid" data-coupons-list aria-live="polite"></div>
         </section>
       </section>
     </main>

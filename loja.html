@@ -48,8 +48,8 @@
           <span class="store-kicker"><i></i> LOJA / REDE PLAY STEX</span>
           <h1>VANTAGENS PARA<br /><span>SUA HISTÓRIA.</span></h1>
           <p>
-            Escolha seu plano de Sócio e pague com MV ou Pix. Compras com MV
-            são entregues automaticamente; no Pix, envie o comprovante para a equipe.
+            Escolha seu plano de Sócio ou compre moedas MV. Planos podem ser pagos
+            com MV ou Pix; as moedas são adquiridas pelo Pix e creditadas no jogo.
           </p>
           <a class="store-scroll-link" href="#produtos">
             Ver produtos
@@ -89,7 +89,34 @@
           <a href="painel.html?return=loja.html" data-store-account-link>Conectar personagem</a>
         </div>
 
-        <div class="product-grid">
+        <nav class="store-tabs" role="tablist" aria-label="Categorias da loja">
+          <button
+            type="button"
+            id="store-tab-socios"
+            class="is-active"
+            role="tab"
+            aria-selected="true"
+            aria-controls="store-panel-socios"
+            data-store-tab="socios"
+          >Sócios</button>
+          <button
+            type="button"
+            id="store-tab-mv"
+            role="tab"
+            aria-selected="false"
+            aria-controls="store-panel-mv"
+            data-store-tab="mv"
+          >Comprar MV</button>
+        </nav>
+
+        <div
+          class="store-tab-panel"
+          id="store-panel-socios"
+          role="tabpanel"
+          aria-labelledby="store-tab-socios"
+          data-store-panel="socios"
+        >
+          <div class="product-grid">
           <article class="product-card" style="--plan-accent: #d7832e">
             <div class="product-topline"><span>PLANO SÓCIO</span><b>01</b></div>
             <div class="product-symbol plan-badge" aria-hidden="true">C</div>
@@ -211,26 +238,112 @@
               aria-pressed="false"
             >Escolher plano</button>
           </article>
+          </div>
+
+          <div class="plan-selection" data-plan-selection hidden>
+            <div>
+              <small>PLANO SELECIONADO</small>
+              <strong data-selected-plan>Nenhum plano</strong>
+              <span data-selected-price>0 MV</span>
+              <small class="purchase-status" data-purchase-status hidden></small>
+            </div>
+            <div class="plan-payment-actions">
+              <button type="button" class="payment-mv" data-plan-continue>
+                <span data-plan-continue-label>Conectar personagem</span>
+                <span aria-hidden="true">→</span>
+              </button>
+              <button type="button" class="payment-pix" data-plan-pix>
+                <span data-plan-pix-label>Pagar com Pix</span>
+                <span aria-hidden="true">◇</span>
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div class="plan-selection" data-plan-selection hidden>
-          <div>
-            <small>PLANO SELECIONADO</small>
-            <strong data-selected-plan>Nenhum plano</strong>
-            <span data-selected-price>0 MV</span>
-            <small class="purchase-status" data-purchase-status hidden></small>
+        <section
+          class="store-tab-panel mv-purchase-panel"
+          id="store-panel-mv"
+          role="tabpanel"
+          aria-labelledby="store-tab-mv"
+          data-store-panel="mv"
+          hidden
+        >
+          <div class="mv-panel-heading">
+            <div>
+              <span class="store-index">RECARGA / MOEDAS VIP</span>
+              <h3>COLOQUE MV<br /><span>NA SUA CONTA.</span></h3>
+            </div>
+            <p>Escolha a quantidade, confira o valor e pague pelo Pix. Após a conferência da equipe, as moedas serão enviadas ao seu personagem.</p>
           </div>
-          <div class="plan-payment-actions">
-            <button type="button" class="payment-mv" data-plan-continue>
-              <span data-plan-continue-label>Conectar personagem</span>
-              <span aria-hidden="true">→</span>
-            </button>
-            <button type="button" class="payment-pix" data-plan-pix>
-              <span data-plan-pix-label>Pagar com Pix</span>
-              <span aria-hidden="true">◇</span>
-            </button>
-          </div>
-        </div>
+
+          <form class="mv-purchase-form" data-mv-form novalidate>
+            <div class="mv-config-card">
+              <span class="mv-card-index">01 / QUANTIDADE</span>
+              <label class="mv-amount-field">
+                <span>QUANTAS MOEDAS MV?</span>
+                <div>
+                  <input
+                    type="number"
+                    inputmode="numeric"
+                    min="5000"
+                    max="1000000"
+                    step="1000"
+                    value="5000"
+                    required
+                    data-mv-amount
+                    aria-describedby="mv-amount-help"
+                  />
+                  <strong>MV</strong>
+                </div>
+              </label>
+              <small id="mv-amount-help" class="mv-field-help">Mínimo 5.000 • máximo 1.000.000 • de 1.000 em 1.000</small>
+
+              <div class="mv-presets" aria-label="Valores rápidos">
+                <button type="button" class="is-active" data-mv-preset="5000">5.000 MV</button>
+                <button type="button" data-mv-preset="10000">10.000 MV</button>
+                <button type="button" data-mv-preset="25000">25.000 MV</button>
+                <button type="button" data-mv-preset="50000">50.000 MV</button>
+              </div>
+
+              <div class="mv-coupon-box">
+                <label for="mv-coupon">CUPOM DE DESCONTO</label>
+                <div>
+                  <input
+                    id="mv-coupon"
+                    type="text"
+                    maxlength="32"
+                    autocomplete="off"
+                    placeholder="Digite seu cupom"
+                    data-mv-coupon
+                  />
+                  <button type="button" data-apply-mv-coupon>Aplicar</button>
+                </div>
+                <small data-mv-coupon-status>Opcional e válido somente nesta compra de MV.</small>
+              </div>
+            </div>
+
+            <div class="mv-summary-card">
+              <span class="mv-card-index">02 / RESUMO</span>
+              <div class="mv-summary-icon" aria-hidden="true">MV</div>
+              <small>VOCÊ RECEBE</small>
+              <strong class="mv-summary-amount" data-mv-summary-amount>5.000 MV</strong>
+              <div class="mv-price-lines">
+                <div><span>Conversão</span><strong>1.000 MV = R$ 1,00</strong></div>
+                <div><span>Subtotal</span><strong data-mv-subtotal>R$ 5,00</strong></div>
+                <div data-mv-discount-row hidden><span data-mv-discount-label>Desconto</span><strong data-mv-discount>− R$ 0,00</strong></div>
+              </div>
+              <div class="mv-total-line">
+                <span>TOTAL NO PIX</span>
+                <strong data-mv-total>R$ 5,00</strong>
+              </div>
+              <button type="submit" class="mv-buy-button" data-mv-buy>
+                <span data-mv-buy-label>Comprar 5.000 MV no Pix</span>
+                <span aria-hidden="true">◇</span>
+              </button>
+              <small class="mv-purchase-status" data-mv-status hidden></small>
+            </div>
+          </form>
+        </section>
       </section>
 
       <section class="purchase-flow store-container" aria-labelledby="flow-title">
@@ -239,10 +352,10 @@
           <h2 id="flow-title">DA LOJA PARA<br /><span>O SEU JOGO.</span></h2>
         </div>
         <ol>
-          <li><span>01</span><div><strong>Escolha o produto</strong><small>Selecione o pacote que deseja comprar.</small></div></li>
+          <li><span>01</span><div><strong>Escolha o produto</strong><small>Selecione um plano ou a quantidade de MV.</small></div></li>
           <li><span>02</span><div><strong>Conecte seu personagem</strong><small>Use o código gerado com o comando /painel.</small></div></li>
           <li><span>03</span><div><strong>Escolha MV ou Pix</strong><small>Use seu saldo do jogo ou pague o valor indicado no QR Code.</small></div></li>
-          <li><span>04</span><div><strong>Receba no servidor</strong><small>MV é automático. No Pix, envie o comprovante para a equipe.</small></div></li>
+          <li><span>04</span><div><strong>Receba no servidor</strong><small>Após a aprovação e com o personagem online, a entrega vai para o jogo.</small></div></li>
         </ol>
       </section>
     </main>
@@ -261,8 +374,13 @@
           <div class="pix-order-summary">
             <small>PERSONAGEM</small>
             <strong data-pix-player>--</strong>
-            <small>PLANO</small>
-            <strong data-pix-plan>--</strong>
+            <small>PRODUTO</small>
+            <strong data-pix-product>--</strong>
+            <div class="pix-coupon-summary" data-pix-coupon-summary hidden>
+              <span><small>SUBTOTAL</small><strong data-pix-subtotal>--</strong></span>
+              <span><small>CUPOM</small><strong data-pix-coupon>--</strong></span>
+              <span><small>ECONOMIA</small><strong data-pix-discount>--</strong></span>
+            </div>
             <small>VALOR EXATO</small>
             <strong class="pix-total" data-pix-price>R$ 0,00</strong>
             <small>CÓDIGO DO PEDIDO</small>
