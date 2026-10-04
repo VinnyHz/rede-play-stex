@@ -1273,8 +1273,9 @@ h2 {
 
 .footer-top nav {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 28px;
+  gap: 14px 28px;
 }
 
 .footer-top nav a {

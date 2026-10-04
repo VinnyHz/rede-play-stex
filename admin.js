@@ -1,6 +1,5 @@
 const ADMIN_CONFIG = {
   apiUrl: "https://rede-play-stex-api.vinny-fernandessoares.workers.dev",
-  tokenKey: "rps_portal_session",
 };
 
 const EDITABLE_FIELDS = [
@@ -21,6 +20,7 @@ const gate = document.querySelector("[data-admin-gate]");
 const gateTitle = document.querySelector("[data-gate-title]");
 const gateMessage = document.querySelector("[data-gate-message]");
 const gateLogin = document.querySelector("[data-gate-login]");
+const gateRetry = document.querySelector("[data-gate-retry]");
 const dashboard = document.querySelector("[data-admin-dashboard]");
 const adminName = document.querySelector("[data-admin-name]");
 const logoutButton = document.querySelector("[data-admin-logout]");
@@ -52,13 +52,12 @@ let editingAccount = null;
 let refreshTimer = 0;
 let searchTimer = 0;
 let loading = false;
+let checkingAccess = false;
 
-const getToken = () =>
-  localStorage.getItem(ADMIN_CONFIG.tokenKey) || sessionStorage.getItem(ADMIN_CONFIG.tokenKey);
+const getToken = () => window.RPS_SESSION.getToken();
 
 const clearToken = () => {
-  localStorage.removeItem(ADMIN_CONFIG.tokenKey);
-  sessionStorage.removeItem(ADMIN_CONFIG.tokenKey);
+  window.RPS_SESSION.clearToken();
 };
 
 const apiRequest = async (path, options = {}) => {
@@ -80,13 +79,16 @@ const apiRequest = async (path, options = {}) => {
   return data;
 };
 
-const showGate = (title, message, showLogin = false) => {
+const showGate = (title, message, showLogin = false, canRetry = false) => {
   window.clearTimeout(refreshTimer);
   dashboard.hidden = true;
   gate.hidden = false;
-  gateTitle.innerHTML = `${title}<br /><span>RESTRITO.</span>`;
+  gate.setAttribute("aria-busy", "false");
+  gateTitle.textContent = title;
   gateMessage.textContent = message;
   gateLogin.hidden = !showLogin;
+  gateRetry.hidden = !canRetry;
+  gateRetry.disabled = false;
 };
 
 const setFeedback = (message = "", isError = false) => {
@@ -98,11 +100,11 @@ const setFeedback = (message = "", isError = false) => {
 const handleAccessError = (error) => {
   if (error.status === 401) {
     clearToken();
-    showGate("SESSÃO", "Sua sessão expirou. Entre novamente usando o comando /painel dentro do jogo.", true);
+    showGate("Seu acesso expirou", "Entre novamente na sua conta. Marque ‘Manter conectado’ para voltar sem gerar outro código enquanto o acesso estiver válido.", true);
     return true;
   }
   if (error.status === 403) {
-    showGate("ACESSO", "Esta página não está disponível para esta conta.");
+    showGate("Acesso não autorizado", "Sua conta está conectada, mas não tem permissão para abrir a Área ADM.");
     return true;
   }
   return false;
@@ -626,21 +628,41 @@ const switchView = async (viewName) => {
 };
 
 const initializeAdmin = async () => {
+  if (checkingAccess) return;
   if (!getToken()) {
-    showGate("SESSÃO", "Entre primeiro com sua conta do jogo. Depois volte a este endereço.", true);
+    showGate("Entre na sua conta", "Faça login pela Área do Jogador. Você volta automaticamente para a Área ADM após entrar.", true);
     return;
   }
 
+  checkingAccess = true;
+  showGate("Confirmando seu acesso", "Estamos recuperando sua sessão e conferindo sua permissão.");
+  gate.setAttribute("aria-busy", "true");
+  gateRetry.disabled = true;
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 12000);
+
   try {
-    const result = await apiRequest("/api/admin/me");
+    const result = await apiRequest("/api/admin/me", { signal: controller.signal });
+    window.clearTimeout(timeout);
+    gate.setAttribute("aria-busy", "false");
     adminName.textContent = result.admin.name;
     gate.hidden = true;
     dashboard.hidden = false;
     await switchView("accounts");
   } catch (error) {
-    if (!handleAccessError(error)) showGate("ACESSO", "Esta página não está disponível para esta conta.");
+    if (!handleAccessError(error)) {
+      showGate("Não foi possível conectar", "Seu acesso salvo foi preservado. Confira sua conexão e tente novamente.", false, true);
+    }
+  } finally {
+    window.clearTimeout(timeout);
+    checkingAccess = false;
   }
 };
+
+gateRetry.addEventListener("click", () => void initializeAdmin());
+window.addEventListener("online", () => {
+  if (!gate.hidden && !gateRetry.hidden) void initializeAdmin();
+});
 
 tabs.forEach((tab) => tab.addEventListener("click", () => switchView(tab.dataset.adminTab)));
 orderFilter.addEventListener("change", loadOrders);
@@ -663,9 +685,19 @@ document.querySelectorAll("[data-close-account-dialog]").forEach((button) => {
 accountDialog.addEventListener("click", (event) => {
   if (event.target === accountDialog) closeAccountEditor();
 });
-logoutButton.addEventListener("click", () => {
-  clearToken();
-  window.location.replace("painel.html");
+logoutButton.addEventListener("click", async () => {
+  logoutButton.disabled = true;
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 10000);
+  try {
+    await apiRequest("/api/logout", { method: "POST", signal: controller.signal });
+  } catch {
+    // Encerra o acesso local também quando a conexão estiver indisponível.
+  } finally {
+    window.clearTimeout(timeout);
+    clearToken();
+    window.location.replace("painel.html");
+  }
 });
 
 setCouponDateBounds();

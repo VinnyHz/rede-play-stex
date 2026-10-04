@@ -6,10 +6,13 @@
     <meta name="robots" content="noindex, nofollow, noarchive" />
     <meta name="theme-color" content="#050b16" />
     <title>Painel restrito — Rede Play Stex</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v=blue" />
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-stex-blue-32.png" />
+    <link rel="icon" type="image/svg+xml" sizes="any" href="assets/favicon-stex.svg?v=blue" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="admin.css" />
+    <link rel="stylesheet" href="admin.css?v=2" />
   </head>
   <body>
     <div class="admin-noise" aria-hidden="true"></div>
@@ -25,12 +28,15 @@
     </header>
 
     <main class="admin-main admin-container">
-      <section class="access-gate" data-admin-gate>
+      <section class="access-gate" data-admin-gate aria-live="polite" aria-busy="true">
         <span class="gate-icon" aria-hidden="true">◇</span>
-        <p class="eyebrow">PAINEL / VERIFICAÇÃO</p>
-        <h1 data-gate-title>VERIFICANDO<br /><span>ACESSO.</span></h1>
-        <p data-gate-message>Confirmando sua sessão e permissão no servidor.</p>
-        <a href="painel.html" data-gate-login hidden>Entrar pela Área do Jogador</a>
+        <p class="eyebrow">ÁREA ADM</p>
+        <h1 data-gate-title>Confirmando<br /><span>seu acesso</span></h1>
+        <p data-gate-message>Estamos recuperando sua sessão e conferindo sua permissão.</p>
+        <div class="gate-actions">
+          <a href="painel.html?return=admin.html" data-gate-login hidden>Entrar na minha conta</a>
+          <button type="button" data-gate-retry hidden>Tentar novamente</button>
+        </div>
       </section>
 
       <section class="admin-dashboard" data-admin-dashboard hidden>
@@ -194,6 +200,7 @@
       </form>
     </dialog>
 
-    <script src="admin.js"></script>
+    <script src="portal-session.js?v=1"></script>
+    <script src="admin.js?v=2"></script>
   </body>
 </html>

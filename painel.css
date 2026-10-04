@@ -5,6 +5,10 @@
   --portal-line: rgba(255, 255, 255, 0.095);
 }
 
+.portal-body [hidden] {
+  display: none !important;
+}
+
 .portal-body {
   min-height: 100vh;
   background:
@@ -280,6 +284,71 @@
 .field-wrap input:focus {
   border-color: rgba(76, 141, 255, 0.6);
   box-shadow: 0 0 0 3px rgba(76, 141, 255, 0.08);
+}
+
+.login-form > .remember-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 20px 0 0;
+  color: #c1cee0;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.remember-option input {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+  margin: 1px 0 0;
+  accent-color: var(--portal-blue);
+}
+
+.remember-option span {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.remember-option small {
+  color: #8493aa;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.session-status {
+  padding: 18px;
+  border: 1px solid rgba(76, 141, 255, 0.22);
+  border-radius: 9px;
+  background: rgba(76, 141, 255, 0.06);
+}
+
+.session-status > span {
+  color: var(--portal-blue);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.session-status p {
+  margin: 12px 0 0;
+  color: #a7b6cc;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.session-status button {
+  margin-top: 16px;
+  padding: 10px 14px;
+  border: 1px solid rgba(76, 141, 255, 0.35);
+  border-radius: 6px;
+  color: #c5d8f8;
+  background: rgba(76, 141, 255, 0.12);
+  cursor: pointer;
+  font: 600 11px/1 "DM Sans", sans-serif;
 }
 
 .form-alert {

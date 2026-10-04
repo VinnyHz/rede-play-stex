@@ -1,28 +1,19 @@
 const PORTAL_CONFIG = {
   apiUrl: "https://rede-play-stex-api.vinny-fernandessoares.workers.dev",
-  tokenKey: "rps_portal_session",
   activeRewardOrderKey: "rps_active_reward_order",
 };
 
 const requestedReturn = new URLSearchParams(window.location.search).get("return");
-const safeReturnPage = requestedReturn === "loja.html" ? "loja.html" : "";
+const safeReturnPage = ["loja.html", "admin.html"].includes(requestedReturn) ? requestedReturn : "";
 
-const getPortalToken = () =>
-  localStorage.getItem(PORTAL_CONFIG.tokenKey) || sessionStorage.getItem(PORTAL_CONFIG.tokenKey);
+const getPortalToken = () => window.RPS_SESSION.getToken();
 
-const savePortalToken = (token) => {
-  localStorage.setItem(PORTAL_CONFIG.tokenKey, token);
-  sessionStorage.removeItem(PORTAL_CONFIG.tokenKey);
-};
+const savePortalToken = (token, remember) => window.RPS_SESSION.saveToken(token, remember);
 
 const clearPortalToken = () => {
-  localStorage.removeItem(PORTAL_CONFIG.tokenKey);
-  sessionStorage.removeItem(PORTAL_CONFIG.tokenKey);
+  window.RPS_SESSION.clearToken();
   localStorage.removeItem(PORTAL_CONFIG.activeRewardOrderKey);
 };
-
-const previousTabToken = sessionStorage.getItem(PORTAL_CONFIG.tokenKey);
-if (previousTabToken && !localStorage.getItem(PORTAL_CONFIG.tokenKey)) savePortalToken(previousTabToken);
 
 const loginView = document.querySelector("[data-login-view]");
 const dashboardView = document.querySelector("[data-dashboard-view]");
@@ -30,6 +21,10 @@ const loginForm = document.querySelector("[data-login-form]");
 const loginButton = document.querySelector("[data-login-submit]");
 const submitLabel = document.querySelector("[data-submit-label]");
 const formAlert = document.querySelector("[data-form-alert]");
+const sessionStatus = document.querySelector("[data-session-status]");
+const sessionMessage = document.querySelector("[data-session-message]");
+const sessionRetryButton = document.querySelector("[data-session-retry]");
+const loginHelp = [...document.querySelectorAll("[data-login-help]")];
 const logoutButton = document.querySelector("[data-logout]");
 const adminAccessButton = document.querySelector("[data-admin-access]");
 const openRewardsButton = document.querySelector("[data-open-rewards]");
@@ -42,6 +37,7 @@ const rewardOptions = [...document.querySelectorAll("[data-reward-select]")];
 let connectedPlayer = null;
 let rewardOrderInProgress = false;
 let rewardOrderPolling = false;
+let restoringSession = false;
 
 document.querySelector("[data-current-year]").textContent = new Date().getFullYear();
 
@@ -384,7 +380,26 @@ const showLogin = () => {
   adminAccessButton.hidden = true;
   dashboardView.hidden = true;
   loginView.hidden = false;
+  loginForm.hidden = false;
+  sessionStatus.hidden = true;
+  loginHelp.forEach((element) => { element.hidden = false; });
 };
+
+const showSessionStatus = (message, canRetry = false) => {
+  showLogin();
+  loginForm.hidden = true;
+  loginHelp.forEach((element) => { element.hidden = true; });
+  sessionStatus.hidden = false;
+  sessionStatus.setAttribute("aria-busy", String(!canRetry));
+  sessionMessage.textContent = message;
+  sessionRetryButton.hidden = !canRetry;
+  sessionRetryButton.disabled = !canRetry;
+};
+
+loginForm.elements.code.addEventListener("input", () => {
+  const input = loginForm.elements.code;
+  input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8);
+});
 
 loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -398,6 +413,7 @@ loginForm.addEventListener("submit", async (event) => {
   }
 
   const formData = new FormData(loginForm);
+  const remember = loginForm.elements.remember.checked;
   setLoading(true);
 
   try {
@@ -406,10 +422,11 @@ loginForm.addEventListener("submit", async (event) => {
       body: JSON.stringify({
         character: String(formData.get("character") || "").trim(),
         code: String(formData.get("code") || "").trim().toUpperCase(),
+        remember,
       }),
     });
 
-    savePortalToken(result.token);
+    savePortalToken(result.token, remember);
     loginForm.reset();
     finishAuthentication(result.player);
   } catch (error) {
@@ -434,15 +451,34 @@ logoutButton.addEventListener("click", async () => {
 
 const restoreSession = async () => {
   const token = getPortalToken();
-  if (!token || PORTAL_CONFIG.apiUrl.includes("SEU-SUBDOMINIO")) return;
+  if (!token || restoringSession || PORTAL_CONFIG.apiUrl.includes("SEU-SUBDOMINIO")) return;
+
+  restoringSession = true;
+  clearAlert();
+  showSessionStatus("Recuperando seu acesso salvo. Você não precisa gerar outro código.");
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 12000);
 
   try {
-    const result = await apiRequest("/api/me");
+    const result = await apiRequest("/api/me", { signal: controller.signal });
     finishAuthentication(result.player);
-  } catch {
-    clearPortalToken();
-    showLogin();
+  } catch (error) {
+    if (error.status === 401) {
+      clearPortalToken();
+      showLogin();
+      showAlert("Seu acesso expirou. Gere um novo código com /painel e marque ‘Manter conectado’ para os próximos acessos.");
+    } else {
+      showSessionStatus("Não foi possível conectar agora. Seu acesso continua salvo. Confira sua conexão e tente novamente.", true);
+    }
+  } finally {
+    window.clearTimeout(timeout);
+    restoringSession = false;
   }
 };
+
+sessionRetryButton.addEventListener("click", () => void restoreSession());
+window.addEventListener("online", () => {
+  if (!sessionStatus.hidden) void restoreSession();
+});
 
 restoreSession();

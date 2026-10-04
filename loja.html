@@ -9,6 +9,9 @@
     />
     <meta name="theme-color" content="#050b16" />
     <title>Loja — Rede Play Stex</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v=blue" />
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-stex-blue-32.png" />
+    <link rel="icon" type="image/svg+xml" sizes="any" href="assets/favicon-stex.svg?v=blue" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -99,6 +102,14 @@
             aria-controls="store-panel-socios"
             data-store-tab="socios"
           >Sócios</button>
+          <button
+            type="button"
+            id="store-tab-pacotes"
+            role="tab"
+            aria-selected="false"
+            aria-controls="store-panel-pacotes"
+            data-store-tab="pacotes"
+          >Pacotes</button>
           <button
             type="button"
             id="store-tab-mv"
@@ -261,6 +272,34 @@
         </div>
 
         <section
+          class="store-tab-panel package-panel"
+          id="store-panel-pacotes"
+          role="tabpanel"
+          aria-labelledby="store-tab-pacotes"
+          data-store-panel="pacotes"
+          hidden
+        >
+          <div class="package-coming-soon">
+            <div class="package-coming-soon-copy">
+              <span class="store-index">PACOTES / NOVIDADES</span>
+              <h3>PACOTES ESPECIAIS<br /><span>EM PREPARAÇÃO.</span></h3>
+              <p>Novas combinações de itens e vantagens chegarão em breve. Cada pacote aparecerá aqui com seu conteúdo, preço e forma de pagamento.</p>
+              <div class="package-coming-soon-tags" aria-label="Informações dos futuros pacotes">
+                <span>Conteúdo detalhado</span>
+                <span>Preço transparente</span>
+                <span>Entrega no jogo</span>
+              </div>
+            </div>
+            <div class="package-coming-soon-visual" aria-hidden="true">
+              <span>RPS</span>
+              <strong>PACOTES</strong>
+              <small>NOVOS ITENS EM BREVE</small>
+              <i></i>
+            </div>
+          </div>
+        </section>
+
+        <section
           class="store-tab-panel mv-purchase-panel"
           id="store-panel-mv"
           role="tabpanel"
@@ -352,7 +391,7 @@
           <h2 id="flow-title">DA LOJA PARA<br /><span>O SEU JOGO.</span></h2>
         </div>
         <ol>
-          <li><span>01</span><div><strong>Escolha o produto</strong><small>Selecione um plano ou a quantidade de MV.</small></div></li>
+          <li><span>01</span><div><strong>Escolha o produto</strong><small>Selecione um plano, pacote ou a quantidade de MV.</small></div></li>
           <li><span>02</span><div><strong>Conecte seu personagem</strong><small>Use o código gerado com o comando /painel.</small></div></li>
           <li><span>03</span><div><strong>Escolha MV ou Pix</strong><small>Use seu saldo do jogo ou pague o valor indicado no QR Code.</small></div></li>
           <li><span>04</span><div><strong>Receba no servidor</strong><small>Após a aprovação e com o personagem online, a entrega vai para o jogo.</small></div></li>
@@ -390,7 +429,7 @@
         <p class="pix-warning">O Pix não é confirmado automaticamente. Guarde o comprovante e somente pague o valor exibido acima.</p>
         <div class="pix-actions">
           <button type="button" data-copy-pix-order>Copiar dados do pedido</button>
-          <a href="https://discord.gg/redeplaystex" target="_blank" rel="noreferrer" data-pix-discord>Enviar comprovante no Discord</a>
+          <a href="https://discord.gg/B2gHbcpqfA" target="_blank" rel="noreferrer" data-pix-discord>Enviar comprovante no Discord</a>
         </div>
         <small class="pix-copy-status" data-pix-copy-status hidden></small>
       </section>
@@ -402,11 +441,12 @@
         <nav aria-label="Links do rodapé">
           <a href="index.html">Site</a>
           <a href="painel.html">Área do jogador</a>
-          <a href="https://discord.gg/redeplaystex" target="_blank" rel="noreferrer">Suporte</a>
+          <a href="https://discord.gg/B2gHbcpqfA" target="_blank" rel="noreferrer">Suporte</a>
         </nav>
       </div>
     </footer>
 
-    <script src="loja.js"></script>
+    <script src="portal-session.js?v=1"></script>
+    <script src="loja.js?v=2"></script>
   </body>
 </html>

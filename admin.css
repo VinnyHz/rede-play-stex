@@ -101,8 +101,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .eyebrow { margin: 0 0 16px; color: var(--blue); font-size: 10px; font-weight: 700; letter-spacing: 0.2em; }
 h1 { margin: 0; font: 700 clamp(40px, 7vw, 76px)/0.92 "Space Grotesk", sans-serif; letter-spacing: -0.06em; }
 h1 span { color: var(--blue); }
+.access-gate h1 { font-size: clamp(30px, 5vw, 48px); line-height: 1.1; letter-spacing: -0.04em; }
 .access-gate > p:not(.eyebrow) { max-width: 410px; margin: 24px auto; color: var(--muted); line-height: 1.7; }
-.access-gate a {
+.gate-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.access-gate a,
+.access-gate button {
   display: inline-flex;
   min-height: 48px;
   align-items: center;
@@ -110,11 +113,16 @@ h1 span { color: var(--blue); }
   padding: 0 22px;
   color: #06101f;
   background: var(--blue);
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
   font-size: 12px;
   font-weight: 700;
   text-decoration: none;
   text-transform: uppercase;
 }
+.access-gate a:hover,
+.access-gate button:hover { background: #659dff; }
 
 .dashboard-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; }
 .admin-identity {

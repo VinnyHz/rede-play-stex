@@ -1,6 +1,5 @@
 const STORE_CONFIG = {
   apiUrl: "https://rede-play-stex-api.vinny-fernandessoares.workers.dev",
-  tokenKey: "rps_portal_session",
   activeTabKey: "rps_store_active_tab",
   selectedPlanKey: "rps_store_selected_plan",
   activeOrderKey: "rps_store_active_order",
@@ -70,18 +69,10 @@ let currentMvQuote = null;
 let appliedCouponCode = "";
 let quoteInProgress = false;
 
-const previousTabToken = sessionStorage.getItem(STORE_CONFIG.tokenKey);
-if (previousTabToken && !localStorage.getItem(STORE_CONFIG.tokenKey)) {
-  localStorage.setItem(STORE_CONFIG.tokenKey, previousTabToken);
-  sessionStorage.removeItem(STORE_CONFIG.tokenKey);
-}
-
-const getPortalToken = () =>
-  localStorage.getItem(STORE_CONFIG.tokenKey) || sessionStorage.getItem(STORE_CONFIG.tokenKey);
+const getPortalToken = () => window.RPS_SESSION.getToken();
 
 const clearPortalToken = () => {
-  localStorage.removeItem(STORE_CONFIG.tokenKey);
-  sessionStorage.removeItem(STORE_CONFIG.tokenKey);
+  window.RPS_SESSION.clearToken();
 };
 
 if (storeYear) storeYear.textContent = new Date().getFullYear();
@@ -749,7 +740,7 @@ try {
 }
 
 const savedTab = sessionStorage.getItem(STORE_CONFIG.activeTabKey);
-switchStoreTab(["socios", "mv"].includes(savedTab) ? savedTab : "socios");
+switchStoreTab(["socios", "pacotes", "mv"].includes(savedTab) ? savedTab : "socios");
 renderMvQuote();
 
 const initializeStore = async () => {

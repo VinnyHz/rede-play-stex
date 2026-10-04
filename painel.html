@@ -6,6 +6,9 @@
     <meta name="description" content="Área do jogador da Rede Play Stex." />
     <meta name="theme-color" content="#050b16" />
     <title>Área do Jogador — Rede Play Stex</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v=blue" />
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-stex-blue-32.png" />
+    <link rel="icon" type="image/svg+xml" sizes="any" href="assets/favicon-stex.svg?v=blue" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://assets.open.mp" crossorigin />
@@ -14,7 +17,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="painel.css?v=3" />
+    <link rel="stylesheet" href="painel.css?v=4" />
   </head>
   <body class="portal-body">
     <div class="noise" aria-hidden="true"></div>
@@ -75,6 +78,12 @@
               </div>
             </div>
 
+            <div class="session-status" data-session-status role="status" hidden>
+              <span>SEU ACESSO</span>
+              <p data-session-message>Recuperando seu acesso salvo...</p>
+              <button type="button" data-session-retry hidden>Tentar novamente</button>
+            </div>
+
             <form class="login-form" data-login-form novalidate>
               <label for="character-name">Nome do personagem</label>
               <div class="field-wrap">
@@ -103,6 +112,8 @@
                   name="code"
                   type="text"
                   autocomplete="one-time-code"
+                  autocapitalize="characters"
+                  spellcheck="false"
                   minlength="8"
                   maxlength="8"
                   pattern="[A-Za-z0-9]+"
@@ -110,6 +121,11 @@
                   required
                 />
               </div>
+
+              <label class="remember-option" for="remember-session">
+                <input id="remember-session" name="remember" type="checkbox" />
+                <span>Manter conectado<small>Salvar meu acesso neste aparelho por até 30 dias.</small></span>
+              </label>
 
               <div class="form-alert" role="alert" data-form-alert hidden></div>
 
@@ -119,12 +135,12 @@
               </button>
             </form>
 
-            <div class="security-note">
+            <div class="security-note" data-login-help>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v5c0 5 3.4 8.5 8 10 4.6-1.5 8-5 8-10V6l-8-3Zm-3 9 2 2 4-4" /></svg>
-              <p><strong>Conexão protegida</strong><small>O código expira em cinco minutos e funciona somente uma vez.</small></p>
+              <p><strong>Conexão protegida</strong><small>O código vale por cinco minutos e um único uso. Use “Manter conectado” apenas no seu aparelho.</small></p>
             </div>
           </div>
-          <p class="account-help">Entre no servidor e use <strong>/painel</strong> para receber seu código de acesso.</p>
+          <p class="account-help" data-login-help>Gere seu código com <strong>/painel</strong>. Marque “Manter conectado” para voltar sem repetir o comando enquanto seu acesso estiver válido.</p>
         </div>
       </section>
 
@@ -300,6 +316,7 @@
       </div>
     </footer>
 
-    <script src="painel.js?v=3"></script>
+    <script src="portal-session.js?v=1"></script>
+    <script src="painel.js?v=4"></script>
   </body>
 </html>
