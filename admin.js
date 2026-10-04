@@ -318,6 +318,7 @@ const submitAccountChanges = async (event) => {
 
 const isMvPixOrder = (order) => {
   const kind = String(order?.orderType ?? order?.kind ?? order?.productType ?? "").toLowerCase();
+  if (kind === "package") return false;
   return kind === "mv" || kind === "vip_coins" || Number(order?.mvAmount ?? order?.vipCoinsAmount) > 0;
 };
 
@@ -350,7 +351,7 @@ const reviewOrder = async (order, action) => {
   if (loading) return;
   let reason = "";
   if (action === "approve") {
-    const delivery = isMvPixOrder(order) ? "as moedas MV" : "o plano";
+    const delivery = isMvPixOrder(order) ? "as moedas MV" : (order.orderType === "package" ? "o Pacote Novato (skin 230, 5.000 MV e $500.000)" : "o plano");
     const confirmed = window.confirm(
       `Você conferiu na conta da Caixa o recebimento de ${formatPix(order.pixAmountCents)} para o pedido ${order.orderId}?\n\nAprovar vai liberar ${delivery} no jogo.`
     );

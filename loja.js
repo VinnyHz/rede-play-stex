@@ -6,6 +6,13 @@ const STORE_CONFIG = {
   activePixOrderKey: "rps_store_active_pix_order",
 };
 
+const STARTER_PACKAGE = Object.freeze({
+  id: "pacote-novato",
+  name: "Pacote Novato",
+  kind: "package",
+  pixPrice: 5,
+});
+
 const MV_PURCHASE = {
   min: 5000,
   max: 1000000,
@@ -25,6 +32,9 @@ const continueLabel = document.querySelector("[data-plan-continue-label]");
 const pixButton = document.querySelector("[data-plan-pix]");
 const pixLabel = document.querySelector("[data-plan-pix-label]");
 const purchaseStatus = document.querySelector("[data-purchase-status]");
+const packagePixButton = document.querySelector("[data-package-pix]");
+const packagePixLabel = document.querySelector("[data-package-pix-label]");
+const packageStatus = document.querySelector("[data-package-status]");
 const accountCard = document.querySelector("[data-store-account]");
 const accountName = document.querySelector("[data-store-account-name]");
 const accountBalance = document.querySelector("[data-store-account-balance]");
@@ -135,6 +145,14 @@ const setPurchaseStatus = (message, type = "") => {
   purchaseStatus.classList.toggle("is-error", type === "error");
 };
 
+const setPackageStatus = (message, type = "") => {
+  if (!packageStatus) return;
+  packageStatus.textContent = message;
+  packageStatus.hidden = !message;
+  packageStatus.classList.toggle("is-success", type === "success");
+  packageStatus.classList.toggle("is-error", type === "error");
+};
+
 const setMvStatus = (message = "", type = "") => {
   if (!mvStatus) return;
   mvStatus.textContent = message;
@@ -189,6 +207,8 @@ const updateMvButtons = () => {
 };
 
 const updateContinueButton = () => {
+  if (packagePixButton) packagePixButton.disabled = purchaseInProgress;
+  if (packagePixLabel) packagePixLabel.textContent = purchaseInProgress ? "Aguarde..." : "Comprar por R$ 5 no Pix";
   if (!continueButton || !continueLabel) return;
   continueButton.disabled = purchaseInProgress;
   if (pixButton) pixButton.disabled = purchaseInProgress;
@@ -353,6 +373,9 @@ const failureMessages = {
   invalid_order: "O pedido recebido pelo servidor é inválido.",
   apply_failed: "O servidor não conseguiu ativar o plano.",
   save_failed: "O servidor não conseguiu salvar a compra. Nenhum MV foi consumido.",
+  invalid_package: "Os dados do pacote não foram reconhecidos pelo servidor. Fale com a administração.",
+  invalid_payment_method: "Este produto só pode ser comprado pelo Pix.",
+  package_balance_limit: "Seu saldo atingiria o limite do servidor. Fale com a administração para receber o pacote.",
 };
 
 const pollOrder = async (orderId) => {
@@ -450,8 +473,11 @@ const pixReferenceFor = (orderId) => `RPS-PIX-${String(orderId).padStart(6, "0")
 
 const isMvPixOrder = (order) => {
   const kind = String(order?.orderType ?? order?.kind ?? order?.productType ?? "").toLowerCase();
+  if (kind === "package") return false;
   return kind === "mv" || kind === "vip_coins" || Number(order?.mvAmount) > 0;
 };
+
+const isPackagePixOrder = (order) => order?.orderType === "package" || order?.planId === STARTER_PACKAGE.id;
 
 const orderMvAmount = (order) => Number(order?.mvAmount ?? order?.vipCoinsAmount ?? 0) || 0;
 const orderCouponCode = (order) => String(order?.couponCode ?? order?.coupon?.code ?? "").trim().toUpperCase();
@@ -468,6 +494,7 @@ const renderPixOrder = (order, openModal = true) => {
   currentPixOrder = order;
   currentPixReference = pixReferenceFor(order.orderId);
   const mvOrder = isMvPixOrder(order);
+  const packageOrder = isPackagePixOrder(order);
   const mvAmount = orderMvAmount(order);
   const couponCode = orderCouponCode(order);
   const baseCents = orderBaseCents(order);
@@ -476,7 +503,7 @@ const renderPixOrder = (order, openModal = true) => {
   if (pixProduct) {
     pixProduct.textContent = mvOrder
       ? `${formatMv(mvAmount)} para a conta`
-      : (order.planName || currentPlan?.name || "Plano selecionado");
+      : (order.planName || currentPlan?.name || "Produto selecionado");
   }
   if (pixPrice) pixPrice.textContent = formatReais(Number(order.pixAmountCents) / 100);
   if (pixReference) pixReference.textContent = currentPixReference;
@@ -489,10 +516,10 @@ const renderPixOrder = (order, openModal = true) => {
     awaiting_payment: "Pedido criado. Depois de pagar, envie o comprovante e este código para a administração.",
     approved: "Pagamento aprovado. A entrega está sendo preparada.",
     queued: "Pagamento aprovado. Entre no jogo e mantenha o personagem conectado para receber.",
-    processing: mvOrder ? "O servidor está creditando suas moedas agora." : "O servidor está entregando seu plano agora.",
-    completed: mvOrder ? "Pagamento aprovado e moedas entregues no jogo!" : "Pagamento aprovado e plano entregue no jogo!",
+    processing: mvOrder ? "O servidor está creditando suas moedas agora." : (packageOrder ? "O servidor está entregando os itens do seu pacote agora." : "O servidor está entregando seu plano agora."),
+    completed: mvOrder ? "Pagamento aprovado e moedas entregues no jogo!" : (packageOrder ? "Pacote entregue! Skin 230, 5.000 MV e $500.000 recebidos no jogo." : "Pagamento aprovado e plano entregue no jogo!"),
     rejected: order.failureReason || "O pagamento não foi confirmado pela administração.",
-    failed: order.failureReason || `Não foi possível entregar ${mvOrder ? "as moedas" : "o plano"}. Fale com a administração.`,
+    failed: failureMessages[order.failureReason] || order.failureReason || `Não foi possível entregar ${mvOrder ? "as moedas" : (packageOrder ? "o pacote" : "o plano")}. Fale com a administração.`,
   };
   const message = statusMessages[order.status] || "Acompanhando seu pedido Pix.";
   if (pixCopyStatus) {
@@ -511,6 +538,7 @@ const renderPixOrder = (order, openModal = true) => {
     ? "success"
     : (["rejected", "failed"].includes(order.status) ? "error" : "");
   if (mvOrder) setMvStatus(message, statusType);
+  else if (packageOrder) setPackageStatus(message, statusType);
   else setPurchaseStatus(message, statusType);
   if (order.status === "completed") refreshAccount();
 
@@ -543,16 +571,17 @@ const closePixCheckout = () => {
   document.body.classList.remove("store-modal-open");
 };
 
-const openPixCheckout = async () => {
-  if (!currentPlan || !pixModal || purchaseInProgress) return;
+const openPixCheckout = async (product = currentPlan) => {
+  if (!product || !pixModal || purchaseInProgress) return;
+  const setCheckoutStatus = product.kind === "package" ? setPackageStatus : setPurchaseStatus;
 
   if (!connectedPlayer) {
     window.location.assign("painel.html?return=loja.html");
     return;
   }
 
-  if (Number(connectedPlayer.vipLevel) > 0 && Number(connectedPlayer.vipExpire) > 0) {
-    setPurchaseStatus("Você já possui um VIP ou Sócio ativo. Aguarde o plano terminar.", "error");
+  if (product.kind !== "package" && Number(connectedPlayer.vipLevel) > 0 && Number(connectedPlayer.vipExpire) > 0) {
+    setCheckoutStatus("Você já possui um VIP ou Sócio ativo. Aguarde o plano terminar.", "error");
     return;
   }
 
@@ -564,12 +593,12 @@ const openPixCheckout = async () => {
 
   purchaseInProgress = true;
   updateContinueButton();
-  setPurchaseStatus("Criando seu pedido Pix seguro...");
+  setCheckoutStatus("Criando seu pedido Pix seguro...");
 
   try {
     const result = await apiRequest("/api/store/pix-orders", {
       method: "POST",
-      body: JSON.stringify({ planId: currentPlan.id }),
+      body: JSON.stringify({ planId: product.id }),
     });
     renderPixOrder(result.order, true);
     pollPixOrder(result.order.orderId, false);
@@ -577,9 +606,9 @@ const openPixCheckout = async () => {
     if (error.status === 401) {
       clearPortalToken();
       renderDisconnectedAccount();
-      setPurchaseStatus("Sua sessão expirou. Conecte o personagem novamente.", "error");
+      setCheckoutStatus("Sua sessão expirou. Conecte o personagem novamente.", "error");
     } else {
-      setPurchaseStatus(error.message || "Não foi possível criar o pedido Pix.", "error");
+      setCheckoutStatus(error.message || "Não foi possível criar o pedido Pix.", "error");
     }
   } finally {
     purchaseInProgress = false;
@@ -660,7 +689,7 @@ const copyPixOrder = async () => {
     `Personagem: ${currentPixOrder.playerName || connectedPlayer.name || "--"}`,
     mvOrder
       ? `Produto: ${formatMv(orderMvAmount(currentPixOrder))}`
-      : `Plano: ${currentPixOrder.planName}`,
+      : `Produto: ${currentPixOrder.planName}`,
     ...(mvOrder && couponCode ? [`Cupom: ${couponCode}`, `Desconto: ${formatCents(discountCents)}`] : []),
     `Valor: ${formatReais(Number(currentPixOrder.pixAmountCents) / 100)}`,
     `Código: ${currentPixReference}`,
@@ -679,7 +708,8 @@ const copyPixOrder = async () => {
 
 planButtons.forEach((button) => button.addEventListener("click", () => selectPlan(button)));
 continueButton?.addEventListener("click", buySelectedPlan);
-pixButton?.addEventListener("click", openPixCheckout);
+pixButton?.addEventListener("click", () => openPixCheckout());
+packagePixButton?.addEventListener("click", () => openPixCheckout(STARTER_PACKAGE));
 mvForm?.addEventListener("submit", buyMvWithPix);
 mvCouponButton?.addEventListener("click", () => requestMvQuote(normalizedCouponCode(), false));
 mvCouponInput?.addEventListener("input", () => {

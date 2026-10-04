@@ -19,7 +19,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="loja.css?v=3" />
+    <link rel="stylesheet" href="loja.css?v=4" />
   </head>
   <body class="store-body">
     <div class="noise" aria-hidden="true"></div>
@@ -79,7 +79,7 @@
             <h2>ESCOLHA SEU<br /><span>BENEFÍCIO.</span></h2>
           </div>
           <p>
-            Todos os planos abaixo duram 31 dias. Escolha o que combina com seu personagem e confira os benefícios.
+            Escolha entre planos Sócio, pacotes de itens e moedas MV. Confira o conteúdo e o valor de cada produto.
           </p>
         </div>
 
@@ -279,24 +279,27 @@
           data-store-panel="pacotes"
           hidden
         >
-          <div class="package-coming-soon">
-            <div class="package-coming-soon-copy">
-              <span class="store-index">PACOTES / NOVIDADES</span>
-              <h3>PACOTES ESPECIAIS<br /><span>EM PREPARAÇÃO.</span></h3>
-              <p>Novas combinações de itens e vantagens chegarão em breve. Cada pacote aparecerá aqui com seu conteúdo, preço e forma de pagamento.</p>
-              <div class="package-coming-soon-tags" aria-label="Informações dos futuros pacotes">
-                <span>Conteúdo detalhado</span>
-                <span>Preço transparente</span>
-                <span>Entrega no jogo</span>
-              </div>
+          <article class="starter-package" aria-labelledby="starter-package-title">
+            <div class="starter-package-art">
+              <img src="assets/pacote-novato.png" alt="Personagem da skin 230, o mendigo, em uma rua de Los Santos com dinheiro e moedas MV" width="1536" height="1024" loading="lazy" />
+              <span class="starter-package-badge">SEU COMEÇO NA CIDADE</span>
+              <div class="starter-package-art-caption"><span>SKIN 230</span><strong>MENDIGO</strong></div>
             </div>
-            <div class="package-coming-soon-visual" aria-hidden="true">
-              <span>RPS</span>
-              <strong>PACOTES</strong>
-              <small>NOVOS ITENS EM BREVE</small>
-              <i></i>
+            <div class="starter-package-content">
+              <span class="store-index">PACOTE / NOVATO</span>
+              <h3 id="starter-package-title">PACOTE<br /><span>NOVATO.</span></h3>
+              <p>Uma skin para chegar no estilo e saldo para começar sua história na Rede Play Stex.</p>
+              <ul class="starter-package-benefits" aria-label="Itens do Pacote Novato">
+                <li><span aria-hidden="true">230</span><div><strong>Skin 230</strong><small>Mendigo</small></div></li>
+                <li><span aria-hidden="true">MV</span><div><strong>5.000 MV</strong><small>Moedas VIP na sua conta</small></div></li>
+                <li><span aria-hidden="true">$</span><div><strong>$500.000</strong><small>Dinheiro no jogo</small></div></li>
+              </ul>
+              <div class="starter-package-price"><div><small>PAGAMENTO ÚNICO NO PIX</small><strong>R$ 5<span>,00</span></strong></div><span>OS 3 ITENS INCLUÍDOS</span></div>
+              <button type="button" class="starter-package-buy" data-package-pix><span data-package-pix-label>Comprar por R$ 5 no Pix</span><span aria-hidden="true">↗</span></button>
+              <p class="starter-package-delivery">Após a aprovação do Pix pela equipe, entre no jogo para receber os itens.</p>
+              <small class="purchase-status starter-package-status" data-package-status role="status" hidden></small>
             </div>
-          </div>
+          </article>
         </section>
 
         <section
@@ -447,6 +450,6 @@
     </footer>
 
     <script src="portal-session.js?v=1"></script>
-    <script src="loja.js?v=2"></script>
+    <script src="loja.js?v=3"></script>
   </body>
 </html>
