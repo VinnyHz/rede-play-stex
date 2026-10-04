@@ -19,7 +19,7 @@
     <a class="nav-cta account-login" href="painel.html">Minha conta <span aria-hidden="true">↗</span></a>
     <div class="account-connected" hidden>
       <button class="account-bell" type="button" aria-label="Notificações" aria-expanded="false" aria-controls="account-notifications">
-        ${svg("bell")}<span class="account-badge" hidden></span>
+        ${svg("bell")}<span class="account-badge" aria-hidden="true" hidden></span>
       </button>
       <button class="account-trigger" type="button" aria-expanded="false" aria-controls="account-menu">
         <span class="account-avatar" aria-hidden="true"><span class="account-avatar-fallback">${svg("user")}</span><img alt="" hidden /></span>
@@ -115,7 +115,9 @@
           reset();
           window.dispatchEvent(new CustomEvent("rps:session-expired"));
         }
-        throw new Error(result.message || "Não foi possível conectar agora.");
+        const error = new Error(result.message || "Não foi possível conectar agora.");
+        error.status = response.status;
+        throw error;
       }
       if (window.RPS_SESSION.getToken() !== token) throw new Error("A conta conectada mudou.");
       return result;
@@ -129,11 +131,11 @@
   const renderNotifications = () => {
     const unread = notifications.filter(item => !item.read).length;
     badge.hidden = unread === 0;
-    badge.textContent = unread > 99 ? "99+" : String(unread);
     bell.setAttribute("aria-label", unread ? `Notificações: ${unread} não lidas` : "Notificações");
     find(".account-unread").textContent = unread ? `${unread} não ${unread === 1 ? "lida" : "lidas"}` : "Tudo em dia";
     readAll.disabled = !unread || markingRead;
     list.replaceChildren();
+    if (!loaded && !status.hidden) return;
     const visible = notifications.filter(item => preferences.showRead || !item.read);
     if (!visible.length) {
       const empty = document.createElement("p");
@@ -169,6 +171,7 @@
     const refreshButton = find(".account-refresh");
     refreshButton.disabled = true;
     if (!loaded) showStatus("Buscando suas notificações...");
+    if (!loaded) renderNotifications();
     try {
       const result = await request("/api/notifications");
       if (version !== generation) return;
@@ -176,8 +179,13 @@
       loaded = true;
       showStatus("");
       renderNotifications();
-    } catch {
-      if (version === generation) showStatus("Não foi possível atualizar as notificações. Tente novamente.");
+    } catch (error) {
+      if (version === generation) {
+        showStatus(error.status === 404
+          ? "As notificações estão indisponíveis no momento. Tente novamente mais tarde."
+          : "Não foi possível atualizar as notificações. Tente novamente.");
+        renderNotifications();
+      }
     } finally {
       if (version === generation) {
         loading = false;
@@ -325,6 +333,6 @@
     if (event.key === "rps_portal_session") { reset(); void refresh(); }
     else if (player && event.key === preferenceKey()) { const previous = player; reset(); setPlayer(previous); }
   });
-  window.RPS_ACCOUNT = Object.freeze({ setPlayer, reset, refresh });
+  window.RPS_ACCOUNT = Object.freeze({ setPlayer, reset, refresh, refreshNotifications });
   if (host.hasAttribute("data-account-autoload")) void refresh();
 })();

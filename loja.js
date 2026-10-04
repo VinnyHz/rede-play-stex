@@ -529,8 +529,10 @@ const orderDiscountCents = (order) => Math.max(
 
 const renderPixOrder = (order, openModal = true) => {
   if (!order) return;
+  const activityChanged = currentPixOrder?.orderId !== order.orderId || currentPixOrder?.status !== order.status;
   cachePixOrder(order);
   currentPixOrder = order;
+  if (activityChanged) void window.RPS_ACCOUNT?.refreshNotifications();
   currentPixReference = pixReferenceFor(order.orderId);
   const mvOrder = isMvPixOrder(order);
   const packageOrder = isPackagePixOrder(order);

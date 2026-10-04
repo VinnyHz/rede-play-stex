@@ -8,7 +8,7 @@
 .account-bell, .account-trigger { display: flex; align-items: center; justify-content: center; border: 1px solid rgba(143,172,216,0.18); border-radius: 12px; color: #dce7f8; background: rgba(13,27,47,0.74); transition: background 0.2s, border-color 0.2s; }
 .account-bell { position: relative; width: 44px; height: 44px; }
 .account-bell > svg { width: 21px; height: 21px; }
-.account-badge { position: absolute; top: -5px; right: -5px; display: grid; min-width: 18px; height: 18px; padding: 0 4px; place-items: center; border: 2px solid #07101e; border-radius: 20px; color: white; background: #4c8dff; font-size: 9px; font-weight: 700; }
+.account-badge { position: absolute; top: -4px; left: -4px; width: 12px; height: 12px; border: 2px solid #07101e; border-radius: 50%; background: #4c8dff; box-shadow: 0 0 8px rgba(76,141,255,0.4); pointer-events: none; }
 .account-trigger { min-height: 52px; gap: 10px; padding: 5px 10px 5px 6px; }
 .account-trigger > svg { width: 14px; height: 14px; color: #8193ad; }
 .account-avatar { position: relative; display: block; overflow: hidden; width: 38px; height: 38px; flex-shrink: 0; border: 1px solid rgba(76,141,255,0.45); border-radius: 50%; background: radial-gradient(circle at 50% 28%, #284d7d, #0d2038); }
