@@ -80,6 +80,8 @@ let currentMvQuote = null;
 let appliedCouponCode = "";
 let quoteInProgress = false;
 let packageStock = null;
+let packageEligibility = null;
+let packageEligibilityError = false;
 const pendingPixOrders = new Map();
 let pixPollGeneration = 0;
 
@@ -212,8 +214,22 @@ const updateMvButtons = () => {
 
 const updateContinueButton = () => {
   const pendingPix = pendingPixOrders.has(STARTER_PACKAGE.id);
-  if (packagePixButton) packagePixButton.disabled = purchaseInProgress || (!pendingPix && (packageStock == null || packageStock.available <= 0));
-  if (packagePixLabel) packagePixLabel.textContent = purchaseInProgress ? "Aguarde..." : (pendingPix ? "Acompanhar pedido Pix" : (packageStock == null ? "Consultando estoque..." : (packageStock.available <= 0 ? "Esgotado" : "Comprar por R$ 5 no Pix")));
+  const purchased = packageEligibility?.hasPurchased === true;
+  const checkingPurchases = Boolean(getPortalToken()) && packageEligibility == null;
+  if (packagePixButton) {
+    packagePixButton.disabled = purchaseInProgress || (!pendingPix &&
+      (purchased || checkingPurchases || packageStock == null || packageStock.available <= 0));
+  }
+  if (packagePixLabel) {
+    let label = "Comprar por R$ 5 no Pix";
+    if (purchaseInProgress) label = "Aguarde...";
+    else if (pendingPix) label = "Acompanhar pedido Pix";
+    else if (purchased) label = "Pacote já adquirido";
+    else if (checkingPurchases) label = packageEligibilityError ? "Compra indisponível" : "Conferindo suas compras...";
+    else if (packageStock == null) label = "Consultando estoque...";
+    else if (packageStock.available <= 0) label = "Esgotado";
+    packagePixLabel.textContent = label;
+  }
   if (!continueButton || !continueLabel) return;
   continueButton.disabled = purchaseInProgress;
   if (pixButton) pixButton.disabled = purchaseInProgress;
@@ -241,7 +257,7 @@ const refreshPackageStock = async () => {
     }
     packageStock = product;
     if (packageStockLabel) {
-      packageStockLabel.textContent = product.available > 0 ? `${product.available} de ${product.stockLimit} unidades disponíveis` : "Esgotado · edição limitada a 8 unidades";
+      packageStockLabel.textContent = product.available > 0 ? `${product.available} de ${product.stockLimit} unidades disponíveis` : `Esgotado · lote de ${product.stockLimit} unidades`;
       packageStockLabel.classList.toggle("is-sold-out", product.available === 0);
     }
   } catch {
@@ -251,8 +267,35 @@ const refreshPackageStock = async () => {
   updateContinueButton();
 };
 
+const refreshPackageEligibility = async () => {
+  const token = getPortalToken();
+  if (!token) return;
+  try {
+    const result = await apiRequest("/api/store/packages/eligibility");
+    if (token !== getPortalToken()) return;
+    const product = result.packages?.find(item => item.id === STARTER_PACKAGE.id);
+    if (!product || typeof product.hasPurchased !== "boolean") throw new Error("Consulta indisponível.");
+    packageEligibility = product;
+    packageEligibilityError = false;
+    if (product.hasPurchased && !pendingPixOrders.has(STARTER_PACKAGE.id) &&
+        (!packageStatus?.textContent || packageStatus.hidden)) {
+      setPackageStatus("Você já comprou o Pacote Novato. O limite é de uma compra por conta.");
+    }
+  } catch (error) {
+    if (token !== getPortalToken()) return;
+    packageEligibility = null;
+    packageEligibilityError = true;
+    if (error.status === 401) throw error;
+    setPackageStatus("Não foi possível conferir suas compras. Atualize a página para tentar novamente.", "error");
+  }
+  updateContinueButton();
+};
+
 const renderDisconnectedAccount = () => {
   connectedPlayer = null;
+  packageEligibility = null;
+  packageEligibilityError = false;
+  pendingPixOrders.clear();
   window.RPS_ACCOUNT?.reset();
   accountCard?.classList.remove("is-connected");
   if (accountName) accountName.textContent = "Nenhum personagem conectado";
@@ -286,6 +329,7 @@ const refreshAccount = async () => {
 
   try {
     const result = await apiRequest("/api/me");
+    await refreshPackageEligibility();
     renderConnectedAccount(result.player);
     return true;
   } catch (error) {
@@ -505,9 +549,12 @@ const isMvPixOrder = (order) => {
 
 const isPackagePixOrder = (order) => order?.orderType === "package" || order?.planId === STARTER_PACKAGE.id;
 
+const isDuplicatePackagePayment = (order) => isPackagePixOrder(order) &&
+  order.status === "awaiting_payment" && packageEligibility?.hasPurchased === true;
+
 const cachePixOrder = (order) => {
   if (!order?.planId) return;
-  if (["completed", "rejected", "failed"].includes(order.status)) {
+  if (["completed", "rejected", "failed"].includes(order.status) || isDuplicatePackagePayment(order)) {
     if (pendingPixOrders.get(order.planId)?.orderId === order.orderId) pendingPixOrders.delete(order.planId);
     if (Number(sessionStorage.getItem(STORE_CONFIG.activePixOrderKey)) === Number(order.orderId)) {
       sessionStorage.removeItem(STORE_CONFIG.activePixOrderKey);
@@ -531,11 +578,22 @@ const renderPixOrder = (order, openModal = true) => {
   if (!order) return;
   const activityChanged = currentPixOrder?.orderId !== order.orderId || currentPixOrder?.status !== order.status;
   cachePixOrder(order);
+  if (isDuplicatePackagePayment(order)) {
+    window.clearTimeout(pixPollTimer);
+    closePixCheckout();
+    setPackageStatus("Você já comprou o Pacote Novato. O limite é de uma compra por conta.", "error");
+    updateContinueButton();
+    return;
+  }
   currentPixOrder = order;
   if (activityChanged) void window.RPS_ACCOUNT?.refreshNotifications();
   currentPixReference = pixReferenceFor(order.orderId);
   const mvOrder = isMvPixOrder(order);
   const packageOrder = isPackagePixOrder(order);
+  if (packageOrder && ["approved", "queued", "processing", "completed", "failed"].includes(order.status)) {
+    packageEligibility = { id: STARTER_PACKAGE.id, hasPurchased: true, purchaseLimit: 1 };
+    packageEligibilityError = false;
+  }
   const mvAmount = orderMvAmount(order);
   const couponCode = orderCouponCode(order);
   const baseCents = orderBaseCents(order);
@@ -595,6 +653,7 @@ const pollPixOrder = async (orderId, openModal = false, generation = ++pixPollGe
     const result = await apiRequest(`/api/store/pix-orders/${orderId}`);
     if (generation !== pixPollGeneration) return;
     renderPixOrder(result.order, openModal);
+    if (isDuplicatePackagePayment(result.order)) return;
     if (isPackagePixOrder(result.order) && ["completed", "rejected", "failed"].includes(result.order.status)) {
       await refreshPackageStock();
     }
@@ -633,8 +692,15 @@ const openPixCheckout = async (product = currentPlan) => {
   }
 
   const savedPixOrder = pendingPixOrders.get(product.id);
-  if (savedPixOrder) {
+  if (savedPixOrder && !isDuplicatePackagePayment(savedPixOrder)) {
     await pollPixOrder(savedPixOrder.orderId, true);
+    return;
+  }
+
+  if (product.kind === "package" && packageEligibility?.hasPurchased !== false) {
+    setCheckoutStatus(packageEligibility?.hasPurchased
+      ? "Você já comprou o Pacote Novato. O limite é de uma compra por conta."
+      : "Não foi possível conferir suas compras. Atualize a página para tentar novamente.", "error");
     return;
   }
 
@@ -667,7 +733,10 @@ const openPixCheckout = async (product = currentPlan) => {
       setCheckoutStatus("Sua sessão expirou. Conecte o personagem novamente.", "error");
     } else {
       setCheckoutStatus(error.message || "Não foi possível criar o pedido Pix.", "error");
-      if (product.kind === "package") await refreshPackageStock();
+      if (product.kind === "package") {
+        await refreshPackageStock();
+        try { await refreshPackageEligibility(); } catch { /* O próximo acesso pedirá login novamente. */ }
+      }
     }
   } finally {
     purchaseInProgress = false;
