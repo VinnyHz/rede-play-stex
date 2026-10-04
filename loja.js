@@ -80,6 +80,8 @@ let currentMvQuote = null;
 let appliedCouponCode = "";
 let quoteInProgress = false;
 let packageStock = null;
+const pendingPixOrders = new Map();
+let pixPollGeneration = 0;
 
 const getPortalToken = () => window.RPS_SESSION.getToken();
 
@@ -209,7 +211,7 @@ const updateMvButtons = () => {
 };
 
 const updateContinueButton = () => {
-  const pendingPix = Number(sessionStorage.getItem(STORE_CONFIG.activePixOrderKey)) > 0;
+  const pendingPix = pendingPixOrders.has(STARTER_PACKAGE.id);
   if (packagePixButton) packagePixButton.disabled = purchaseInProgress || (!pendingPix && (packageStock == null || packageStock.available <= 0));
   if (packagePixLabel) packagePixLabel.textContent = purchaseInProgress ? "Aguarde..." : (pendingPix ? "Acompanhar pedido Pix" : (packageStock == null ? "Consultando estoque..." : (packageStock.available <= 0 ? "Esgotado" : "Comprar por R$ 5 no Pix")));
   if (!continueButton || !continueLabel) return;
@@ -501,6 +503,18 @@ const isMvPixOrder = (order) => {
 
 const isPackagePixOrder = (order) => order?.orderType === "package" || order?.planId === STARTER_PACKAGE.id;
 
+const cachePixOrder = (order) => {
+  if (!order?.planId) return;
+  if (["completed", "rejected", "failed"].includes(order.status)) {
+    if (pendingPixOrders.get(order.planId)?.orderId === order.orderId) pendingPixOrders.delete(order.planId);
+    if (Number(sessionStorage.getItem(STORE_CONFIG.activePixOrderKey)) === Number(order.orderId)) {
+      sessionStorage.removeItem(STORE_CONFIG.activePixOrderKey);
+    }
+  } else {
+    pendingPixOrders.set(order.planId, order);
+  }
+};
+
 const orderMvAmount = (order) => Number(order?.mvAmount ?? order?.vipCoinsAmount ?? 0) || 0;
 const orderCouponCode = (order) => String(order?.couponCode ?? order?.coupon?.code ?? "").trim().toUpperCase();
 const orderBaseCents = (order) => Number(
@@ -513,6 +527,7 @@ const orderDiscountCents = (order) => Math.max(
 
 const renderPixOrder = (order, openModal = true) => {
   if (!order) return;
+  cachePixOrder(order);
   currentPixOrder = order;
   currentPixReference = pixReferenceFor(order.orderId);
   const mvOrder = isMvPixOrder(order);
@@ -550,7 +565,6 @@ const renderPixOrder = (order, openModal = true) => {
   }
 
   if (["completed", "rejected", "failed"].includes(order.status)) {
-    sessionStorage.removeItem(STORE_CONFIG.activePixOrderKey);
     window.clearTimeout(pixPollTimer);
   } else {
     sessionStorage.setItem(STORE_CONFIG.activePixOrderKey, String(order.orderId));
@@ -571,22 +585,25 @@ const renderPixOrder = (order, openModal = true) => {
   }
 };
 
-const pollPixOrder = async (orderId, openModal = false) => {
+const pollPixOrder = async (orderId, openModal = false, generation = ++pixPollGeneration) => {
   window.clearTimeout(pixPollTimer);
   try {
     const result = await apiRequest(`/api/store/pix-orders/${orderId}`);
+    if (generation !== pixPollGeneration) return;
     renderPixOrder(result.order, openModal);
     if (isPackagePixOrder(result.order) && ["completed", "rejected", "failed"].includes(result.order.status)) {
       await refreshPackageStock();
     }
     if (!["completed", "rejected", "failed"].includes(result.order.status)) {
-      pixPollTimer = window.setTimeout(() => pollPixOrder(orderId, false), 10000);
+      pixPollTimer = window.setTimeout(() => pollPixOrder(orderId, false, generation), 10000);
     }
   } catch (error) {
+    if (generation !== pixPollGeneration) return;
     if (error.status === 401) {
       clearPortalToken();
       renderDisconnectedAccount();
       sessionStorage.removeItem(STORE_CONFIG.activePixOrderKey);
+      pendingPixOrders.clear();
     }
   }
 };
@@ -611,9 +628,9 @@ const openPixCheckout = async (product = currentPlan) => {
     return;
   }
 
-  const savedPixOrderId = Number(sessionStorage.getItem(STORE_CONFIG.activePixOrderKey));
-  if (Number.isInteger(savedPixOrderId) && savedPixOrderId > 0) {
-    await pollPixOrder(savedPixOrderId, true);
+  const savedPixOrder = pendingPixOrders.get(product.id);
+  if (savedPixOrder) {
+    await pollPixOrder(savedPixOrder.orderId, true);
     return;
   }
 
@@ -623,6 +640,8 @@ const openPixCheckout = async (product = currentPlan) => {
   }
 
   purchaseInProgress = true;
+  window.clearTimeout(pixPollTimer);
+  ++pixPollGeneration;
   updateContinueButton();
   setCheckoutStatus("Criando seu pedido Pix seguro...");
 
@@ -631,6 +650,9 @@ const openPixCheckout = async (product = currentPlan) => {
       method: "POST",
       body: JSON.stringify({ planId: product.id }),
     });
+    if (result.order?.planId !== product.id) {
+      throw new Error("Recebemos um pedido de outro produto. Atualize a página ou fale com a equipe.");
+    }
     renderPixOrder(result.order, true);
     if (product.kind === "package") await refreshPackageStock();
     pollPixOrder(result.order.orderId, false);
@@ -665,9 +687,9 @@ const buyMvWithPix = async (event) => {
     return;
   }
 
-  const savedPixOrderId = Number(sessionStorage.getItem(STORE_CONFIG.activePixOrderKey));
-  if (Number.isInteger(savedPixOrderId) && savedPixOrderId > 0) {
-    await pollPixOrder(savedPixOrderId, true);
+  const savedPixOrder = pendingPixOrders.get("mv-coins");
+  if (savedPixOrder) {
+    await pollPixOrder(savedPixOrder.orderId, true);
     return;
   }
 
@@ -689,12 +711,17 @@ const buyMvWithPix = async (event) => {
 
   purchaseInProgress = true;
   setMvStatus("Criando seu pedido Pix seguro...");
+  window.clearTimeout(pixPollTimer);
+  ++pixPollGeneration;
   updateContinueButton();
   try {
     const result = await apiRequest("/api/store/mv-pix-orders", {
       method: "POST",
       body: JSON.stringify({ amount: quote.mvAmount, couponCode: quote.couponCode || "" }),
     });
+    if (result.order?.planId !== "mv-coins") {
+      throw new Error("Recebemos um pedido de outro produto. Atualize a página ou fale com a equipe.");
+    }
     sessionStorage.setItem(STORE_CONFIG.activePixOrderKey, String(result.order.orderId));
     renderPixOrder(result.order, true);
     pollPixOrder(result.order.orderId, false);
@@ -809,6 +836,15 @@ renderMvQuote();
 const initializeStore = async () => {
   await refreshPackageStock();
   const connected = await refreshAccount();
+  const initializeGeneration = pixPollGeneration;
+  if (connected) {
+    try {
+      const result = await apiRequest(`/api/store/pix-orders/active?planId=${STARTER_PACKAGE.id}`);
+      if (result.order?.planId === STARTER_PACKAGE.id) cachePixOrder(result.order);
+      updateContinueButton();
+    } catch { /* O pedido do pacote também pode ser retomado ao criar a compra. */ }
+  }
+  if (initializeGeneration !== pixPollGeneration) return;
   const activeOrderId = Number(sessionStorage.getItem(STORE_CONFIG.activeOrderKey));
   if (connected && Number.isInteger(activeOrderId) && activeOrderId > 0) {
     await pollOrder(activeOrderId);
@@ -819,6 +855,7 @@ const initializeStore = async () => {
   } else if (connected) {
     try {
       const result = await apiRequest("/api/store/pix-orders/active");
+      if (initializeGeneration !== pixPollGeneration) return;
       if (result.order) {
         renderPixOrder(result.order, false);
         await pollPixOrder(result.order.orderId, false);
