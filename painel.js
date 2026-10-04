@@ -314,6 +314,7 @@ const refreshAdminAccess = async () => {
 
 const renderDashboard = (player) => {
   connectedPlayer = player;
+  window.RPS_ACCOUNT?.setPlayer(player);
   const name = String(player.name || "Jogador_RPS");
   const firstName = name.split("_")[0].toUpperCase();
   const level = Math.max(Number(player.level) || 1, 1);
@@ -376,6 +377,7 @@ const finishAuthentication = (player) => {
 
 const showLogin = () => {
   connectedPlayer = null;
+  window.RPS_ACCOUNT?.reset();
   closeRewardsModal();
   adminAccessButton.hidden = true;
   dashboardView.hidden = true;
@@ -481,4 +483,5 @@ window.addEventListener("online", () => {
   if (!sessionStatus.hidden) void restoreSession();
 });
 
+window.addEventListener("rps:session-expired", showLogin);
 restoreSession();

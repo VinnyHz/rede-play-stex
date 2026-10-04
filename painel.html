@@ -18,6 +18,7 @@
     />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="painel.css?v=4" />
+    <link rel="stylesheet" href="account-header.css?v=1" />
   </head>
   <body class="portal-body">
     <div class="noise" aria-hidden="true"></div>
@@ -34,10 +35,10 @@
           </span>
         </a>
         <span class="portal-label">ÁREA DO JOGADOR</span>
-        <a class="back-link" href="index.html">
-          <span aria-hidden="true">←</span>
-          Voltar ao site
-        </a>
+        <div class="portal-header-actions">
+          <a class="back-link" href="index.html"><span aria-hidden="true">←</span>Voltar ao site</a>
+          <div class="account-header" data-account-header></div>
+        </div>
       </div>
     </header>
 
@@ -317,6 +318,7 @@
     </footer>
 
     <script src="portal-session.js?v=1"></script>
-    <script src="painel.js?v=4"></script>
+    <script src="account-header.js?v=1"></script>
+    <script src="painel.js?v=5"></script>
   </body>
 </html>

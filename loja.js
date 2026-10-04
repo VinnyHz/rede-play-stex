@@ -253,6 +253,7 @@ const refreshPackageStock = async () => {
 
 const renderDisconnectedAccount = () => {
   connectedPlayer = null;
+  window.RPS_ACCOUNT?.reset();
   accountCard?.classList.remove("is-connected");
   if (accountName) accountName.textContent = "Nenhum personagem conectado";
   if (accountBalance) accountBalance.textContent = "Entre na Área do Jogador para usar seu saldo de MV.";
@@ -265,6 +266,7 @@ const renderDisconnectedAccount = () => {
 
 const renderConnectedAccount = (player) => {
   connectedPlayer = player;
+  window.RPS_ACCOUNT?.setPlayer(player);
   accountCard?.classList.add("is-connected");
   if (accountName) accountName.textContent = player.name || "Personagem conectado";
   if (accountBalance) accountBalance.textContent = `Saldo disponível: ${formatMv(player.vipCoins)}`;

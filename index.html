@@ -19,6 +19,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="account-header.css?v=1" />
   </head>
   <body>
     <div class="noise" aria-hidden="true"></div>
@@ -46,10 +47,9 @@
           <a href="painel.html">Área do jogador</a>
         </nav>
 
-        <a class="nav-cta" href="painel.html">
-          Minha conta
-          <span aria-hidden="true">↗</span>
-        </a>
+        <div class="account-header" data-account-header data-account-autoload>
+          <a class="nav-cta" href="painel.html">Minha conta <span aria-hidden="true">↗</span></a>
+        </div>
       </div>
     </header>
 
@@ -312,6 +312,8 @@
       <div><strong>IP copiado!</strong><small data-toast-ip>play.redeplaystex.com:7777</small></div>
     </div>
 
+    <script src="portal-session.js?v=1"></script>
+    <script src="account-header.js?v=1"></script>
     <script src="script.js"></script>
   </body>
 </html>
