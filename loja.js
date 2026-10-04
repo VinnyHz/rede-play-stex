@@ -35,6 +35,7 @@ const purchaseStatus = document.querySelector("[data-purchase-status]");
 const packagePixButton = document.querySelector("[data-package-pix]");
 const packagePixLabel = document.querySelector("[data-package-pix-label]");
 const packageStatus = document.querySelector("[data-package-status]");
+const packageStockLabel = document.querySelector("[data-package-stock]");
 const accountCard = document.querySelector("[data-store-account]");
 const accountName = document.querySelector("[data-store-account-name]");
 const accountBalance = document.querySelector("[data-store-account-balance]");
@@ -78,6 +79,7 @@ let quoteRequestId = 0;
 let currentMvQuote = null;
 let appliedCouponCode = "";
 let quoteInProgress = false;
+let packageStock = null;
 
 const getPortalToken = () => window.RPS_SESSION.getToken();
 
@@ -207,8 +209,9 @@ const updateMvButtons = () => {
 };
 
 const updateContinueButton = () => {
-  if (packagePixButton) packagePixButton.disabled = purchaseInProgress;
-  if (packagePixLabel) packagePixLabel.textContent = purchaseInProgress ? "Aguarde..." : "Comprar por R$ 5 no Pix";
+  const pendingPix = Number(sessionStorage.getItem(STORE_CONFIG.activePixOrderKey)) > 0;
+  if (packagePixButton) packagePixButton.disabled = purchaseInProgress || (!pendingPix && (packageStock == null || packageStock.available <= 0));
+  if (packagePixLabel) packagePixLabel.textContent = purchaseInProgress ? "Aguarde..." : (pendingPix ? "Acompanhar pedido Pix" : (packageStock == null ? "Consultando estoque..." : (packageStock.available <= 0 ? "Esgotado" : "Comprar por R$ 5 no Pix")));
   if (!continueButton || !continueLabel) return;
   continueButton.disabled = purchaseInProgress;
   if (pixButton) pixButton.disabled = purchaseInProgress;
@@ -225,6 +228,25 @@ const updateContinueButton = () => {
     if (pixLabel) pixLabel.textContent = "Conectar para usar Pix";
   }
   updateMvButtons();
+};
+
+const refreshPackageStock = async () => {
+  try {
+    const result = await apiRequest("/api/store/packages");
+    const product = result.packages?.find(item => item.id === STARTER_PACKAGE.id);
+    if (!product || !Number.isInteger(product.available) || product.available < 0 || !Number.isInteger(product.stockLimit)) {
+      throw new Error("Estoque indisponível.");
+    }
+    packageStock = product;
+    if (packageStockLabel) {
+      packageStockLabel.textContent = product.available > 0 ? `${product.available} de ${product.stockLimit} unidades disponíveis` : "Esgotado · edição limitada a 8 unidades";
+      packageStockLabel.classList.toggle("is-sold-out", product.available === 0);
+    }
+  } catch {
+    packageStock = null;
+    if (packageStockLabel) packageStockLabel.textContent = "Não foi possível consultar o estoque. Atualize a página para tentar novamente.";
+  }
+  updateContinueButton();
 };
 
 const renderDisconnectedAccount = () => {
@@ -517,7 +539,7 @@ const renderPixOrder = (order, openModal = true) => {
     approved: "Pagamento aprovado. A entrega está sendo preparada.",
     queued: "Pagamento aprovado. Entre no jogo e mantenha o personagem conectado para receber.",
     processing: mvOrder ? "O servidor está creditando suas moedas agora." : (packageOrder ? "O servidor está entregando os itens do seu pacote agora." : "O servidor está entregando seu plano agora."),
-    completed: mvOrder ? "Pagamento aprovado e moedas entregues no jogo!" : (packageOrder ? "Pacote entregue! Skin 230, 5.000 MV e $500.000 recebidos no jogo." : "Pagamento aprovado e plano entregue no jogo!"),
+    completed: mvOrder ? "Pagamento aprovado e moedas entregues no jogo!" : (packageOrder ? "Pacote entregue! Skin 230, 5.000 MV e $500.000 recebidos no jogo. Título BETA desbloqueado: use /tag para escolher." : "Pagamento aprovado e plano entregue no jogo!"),
     rejected: order.failureReason || "O pagamento não foi confirmado pela administração.",
     failed: failureMessages[order.failureReason] || order.failureReason || `Não foi possível entregar ${mvOrder ? "as moedas" : (packageOrder ? "o pacote" : "o plano")}. Fale com a administração.`,
   };
@@ -541,6 +563,7 @@ const renderPixOrder = (order, openModal = true) => {
   else if (packageOrder) setPackageStatus(message, statusType);
   else setPurchaseStatus(message, statusType);
   if (order.status === "completed") refreshAccount();
+  updateContinueButton();
 
   if (openModal && pixModal) {
     pixModal.hidden = false;
@@ -553,6 +576,9 @@ const pollPixOrder = async (orderId, openModal = false) => {
   try {
     const result = await apiRequest(`/api/store/pix-orders/${orderId}`);
     renderPixOrder(result.order, openModal);
+    if (isPackagePixOrder(result.order) && ["completed", "rejected", "failed"].includes(result.order.status)) {
+      await refreshPackageStock();
+    }
     if (!["completed", "rejected", "failed"].includes(result.order.status)) {
       pixPollTimer = window.setTimeout(() => pollPixOrder(orderId, false), 10000);
     }
@@ -591,6 +617,11 @@ const openPixCheckout = async (product = currentPlan) => {
     return;
   }
 
+  if (product.kind === "package" && (packageStock == null || packageStock.available <= 0)) {
+    setCheckoutStatus(packageStock == null ? "Atualize a página para consultar o estoque." : "Pacote Novato esgotado.", "error");
+    return;
+  }
+
   purchaseInProgress = true;
   updateContinueButton();
   setCheckoutStatus("Criando seu pedido Pix seguro...");
@@ -601,6 +632,7 @@ const openPixCheckout = async (product = currentPlan) => {
       body: JSON.stringify({ planId: product.id }),
     });
     renderPixOrder(result.order, true);
+    if (product.kind === "package") await refreshPackageStock();
     pollPixOrder(result.order.orderId, false);
   } catch (error) {
     if (error.status === 401) {
@@ -609,6 +641,7 @@ const openPixCheckout = async (product = currentPlan) => {
       setCheckoutStatus("Sua sessão expirou. Conecte o personagem novamente.", "error");
     } else {
       setCheckoutStatus(error.message || "Não foi possível criar o pedido Pix.", "error");
+      if (product.kind === "package") await refreshPackageStock();
     }
   } finally {
     purchaseInProgress = false;
@@ -774,6 +807,7 @@ switchStoreTab(["socios", "pacotes", "mv"].includes(savedTab) ? savedTab : "soci
 renderMvQuote();
 
 const initializeStore = async () => {
+  await refreshPackageStock();
   const connected = await refreshAccount();
   const activeOrderId = Number(sessionStorage.getItem(STORE_CONFIG.activeOrderKey));
   if (connected && Number.isInteger(activeOrderId) && activeOrderId > 0) {
@@ -782,6 +816,14 @@ const initializeStore = async () => {
   const activePixOrderId = Number(sessionStorage.getItem(STORE_CONFIG.activePixOrderKey));
   if (connected && Number.isInteger(activePixOrderId) && activePixOrderId > 0) {
     await pollPixOrder(activePixOrderId, false);
+  } else if (connected) {
+    try {
+      const result = await apiRequest("/api/store/pix-orders/active");
+      if (result.order) {
+        renderPixOrder(result.order, false);
+        await pollPixOrder(result.order.orderId, false);
+      }
+    } catch { /* A consulta do pedido pode ser repetida ao atualizar a página. */ }
   }
 };
 
