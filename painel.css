@@ -59,6 +59,8 @@
 }
 
 .portal-header {
+  position: relative;
+  z-index: 50;
   border-bottom: 1px solid var(--portal-line);
   background: rgba(5, 11, 22, 0.78);
   backdrop-filter: blur(18px);
