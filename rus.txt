@@ -1,0 +1,14 @@
+Pawn compiler 3.2.3664	 	 	Copyright (c) 1997-2016, ITB CompuPhase
+
+C:\Users\vinny\Downloads\Site\tmp\veteran-hours\gamemodes\RPS.pwn(921) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gFreecamMode"
+C:\Users\vinny\Downloads\Site\tmp\veteran-hours\gamemodes\RPS.pwn(926) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gFreecamPitch"
+C:\Users\vinny\Downloads\Site\tmp\veteran-hours\gamemodes\RPS.pwn(923) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gFreecamPos"
+C:\Users\vinny\Downloads\Site\tmp\veteran-hours\gamemodes\RPS.pwn(928) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gFreecamReturnArmour"
+C:\Users\vinny\Downloads\Site\tmp\veteran-hours\gamemodes\RPS.pwn(927) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gFreecamReturnHealth"
+C:\Users\vinny\Downloads\Site\tmp\veteran-hours\gamemodes\RPS.pwn(929) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gFreecamReturnInterior"
+C:\Users\vinny\Downloads\Site\tmp\veteran-hours\gamemodes\RPS.pwn(924) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gFreecamReturnPos"
+C:\Users\vinny\Downloads\Site\tmp\veteran-hours\gamemodes\RPS.pwn(930) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gFreecamReturnWorld"
+C:\Users\vinny\Downloads\Site\tmp\veteran-hours\gamemodes\RPS.pwn(922) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gFreecamTimer"
+C:\Users\vinny\Downloads\Site\tmp\veteran-hours\gamemodes\RPS.pwn(925) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "gFreecamYaw"
+Pawn compiler 3.2.3664	 	 	Copyright (c) 1997-2016, ITB CompuPhase
+

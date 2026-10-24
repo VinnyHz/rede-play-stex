@@ -16,7 +16,11 @@
   };
   const svg = (name) => `<svg viewBox="0 0 24 24" aria-hidden="true">${icons[name] || icons.info}</svg>`;
   host.innerHTML = `
-    <a class="nav-cta account-login" href="painel.html">Minha conta <span aria-hidden="true">↗</span></a>
+    <a class="nav-cta account-login" href="painel.html" aria-label="Acessar minha conta">
+      <span class="account-login-icon" aria-hidden="true">${svg("user")}</span>
+      <span class="account-login-copy"><strong>Minha conta</strong><small>Área do jogador</small></span>
+      <svg class="account-login-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" /></svg>
+    </a>
     <div class="account-connected" hidden>
       <button class="account-bell" type="button" aria-label="Notificações" aria-expanded="false" aria-controls="account-notifications">
         ${svg("bell")}<span class="account-badge" aria-hidden="true" hidden></span>
@@ -132,7 +136,9 @@
     const unread = notifications.filter(item => !item.read).length;
     badge.hidden = unread === 0;
     bell.setAttribute("aria-label", unread ? `Notificações: ${unread} não lidas` : "Notificações");
-    find(".account-unread").textContent = unread ? `${unread} não ${unread === 1 ? "lida" : "lidas"}` : "Tudo em dia";
+    find(".account-unread").textContent = !loaded
+      ? (loading || status.hidden ? "Consultando avisos..." : "Consulta indisponível")
+      : unread ? `${unread} não ${unread === 1 ? "lida" : "lidas"}` : "Tudo em dia";
     readAll.disabled = !unread || markingRead;
     list.replaceChildren();
     if (!loaded && !status.hidden) return;
@@ -182,7 +188,7 @@
     } catch (error) {
       if (version === generation) {
         showStatus(error.status === 404
-          ? "As notificações estão indisponíveis no momento. Tente novamente mais tarde."
+          ? "As notificações estão indisponíveis. A equipe do servidor precisa habilitar esse recurso."
           : "Não foi possível atualizar as notificações. Tente novamente.");
         renderNotifications();
       }
@@ -190,6 +196,7 @@
       if (version === generation) {
         loading = false;
         refreshButton.disabled = false;
+        renderNotifications();
       }
     }
   };

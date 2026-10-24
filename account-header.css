@@ -4,6 +4,44 @@
 .account-header svg { width: 20px; height: 20px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .account-header :is(button, a, input):focus-visible { outline: 2px solid #4c8dff; outline-offset: 4px; }
 .account-header button:disabled { cursor: wait; opacity: 0.5; }
+.account-header .account-login {
+  display: inline-flex;
+  min-height: 54px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 13px 8px 9px;
+  border: 1px solid rgba(104, 162, 255, 0.34);
+  border-radius: 14px;
+  color: #edf4ff;
+  background: linear-gradient(125deg, #162e50, #0c1b31 82%);
+  box-shadow: inset 0 1px 0 rgba(190, 217, 255, 0.08), 0 6px 20px rgba(0, 16, 43, 0.22);
+  text-decoration: none;
+  text-transform: none;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+.account-header .account-login-icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  place-items: center;
+  border: 1px solid rgba(166, 201, 255, 0.25);
+  border-radius: 10px;
+  color: #f0f6ff;
+  background: linear-gradient(145deg, #518bfa, #2c60c7);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 3px 10px rgba(36, 96, 210, 0.2);
+}
+.account-header .account-login-icon svg { width: 19px; height: 19px; stroke-width: 1.8; }
+.account-header .account-login-copy { display: flex; flex-direction: column; gap: 5px; color: inherit; text-align: left; }
+.account-header .account-login-copy strong { color: #f1f6ff; font: 700 11px/1 "DM Sans", sans-serif; letter-spacing: 0.035em; text-transform: uppercase; white-space: nowrap; }
+.account-header .account-login-copy small { color: #9bb3d6; font: 500 10px/1 "DM Sans", sans-serif; letter-spacing: 0.01em; white-space: nowrap; }
+.account-header .account-login-arrow { width: 17px; height: 17px; margin-left: 3px; color: #80adff; transition: transform 0.2s ease, color 0.2s ease; }
+.account-header .account-login:hover,
+.account-header .account-login:focus-visible { border-color: rgba(114, 173, 255, 0.72); background: linear-gradient(125deg, #1b3a63, #102440 82%); box-shadow: inset 0 1px 0 rgba(190, 217, 255, 0.12), 0 7px 25px rgba(38, 98, 208, 0.2); }
+.account-header .account-login:hover { transform: translateY(-1px); }
+.account-header .account-login:hover .account-login-arrow { color: #c4dbff; transform: translateX(2px); }
+.account-header .account-login:active { transform: translateY(0); }
 .account-connected { display: flex; align-items: center; gap: 12px; }
 .account-bell, .account-trigger { display: flex; align-items: center; justify-content: center; border: 1px solid rgba(143,172,216,0.18); border-radius: 12px; color: #dce7f8; background: rgba(13,27,47,0.74); transition: background 0.2s, border-color 0.2s; }
 .account-bell { position: relative; width: 44px; height: 44px; }
@@ -90,9 +128,25 @@
   .portal-header-actions { gap: 12px; }
   .portal-header-actions .back-link { display: none; }
   .site-header .nav-wrap { gap: 8px; }
-  .account-login { min-height: 42px; padding-inline: 12px; gap: 10px; font-size: 10px; }
+  .account-header .account-login { min-height: 44px; gap: 8px; padding: 6px 10px 6px 6px; border-radius: 12px; }
+  .account-header .account-login-icon { width: 30px; height: 30px; border-radius: 8px; }
+  .account-header .account-login-copy strong { font-size: 10px; }
+  .account-header .account-login-copy small { display: none; }
+  .account-header .account-login-arrow { width: 15px; height: 15px; margin-left: 0; }
 }
 @media (max-width: 480px) {
+  .site-header .brand-mark, .store-header .brand-mark, .portal-header .brand-mark { width: 64px; }
   .site-header .brand-copy, .store-header:has(.account-connected:not([hidden])) .brand-copy, .portal-header:has(.account-connected:not([hidden])) .brand-copy { display: none; }
   .account-identity strong { max-width: 90px; }
+}
+@media (max-width: 360px) {
+  .site-header .brand-mark { width: 54px; }
+  .site-header .account-identity strong { max-width: 60px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .account-header .account-login,
+  .account-header .account-login-arrow { transition: none; }
+  .account-header .account-login:hover,
+  .account-header .account-login:hover .account-login-arrow { transform: none; }
 }

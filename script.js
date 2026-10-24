@@ -1,8 +1,11 @@
 const SITE_CONFIG = {
   serverIp: "play.redeplaystex.com:7777",
-  discordUrl: "https://discord.gg/redeplaystex",
-  playersOnline: 247,
-  maxPlayers: 500,
+  discordUrl: "https://discord.gg/B2gHbcpqfA",
+  instagramUrl: "",
+  youtubeUrl: "",
+  statusApiUrl: "https://rede-play-stex-api.vinny-fernandessoares.workers.dev/api/server/status",
+  localStatusApiUrl: "http://127.0.0.1:3031/api/server/status",
+  statusRefreshMs: 15_000,
 };
 
 const header = document.querySelector(".site-header");
@@ -25,9 +28,25 @@ document.querySelectorAll(".discord-link").forEach((link) => {
   }
 });
 
-document.querySelector("[data-player-count]").textContent = SITE_CONFIG.playersOnline;
-document.querySelector("[data-player-limit]").textContent = `${SITE_CONFIG.maxPlayers} slots`;
-document.querySelector("[data-player-progress]").style.width = `${Math.min((SITE_CONFIG.playersOnline / SITE_CONFIG.maxPlayers) * 100, 100)}%`;
+const socialNetworks = {
+  discord: { name: "Discord", url: SITE_CONFIG.discordUrl },
+  instagram: { name: "Instagram", url: SITE_CONFIG.instagramUrl },
+  youtube: { name: "YouTube", url: SITE_CONFIG.youtubeUrl },
+};
+
+document.querySelectorAll("[data-social-link]").forEach((link) => {
+  const network = socialNetworks[link.dataset.socialLink];
+  if (!network?.url) return;
+
+  link.href = network.url;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  link.title = network.name;
+  link.setAttribute("aria-label", `${network.name} da Rede Play Stex (abre em nova aba)`);
+  link.removeAttribute("aria-disabled");
+  link.removeAttribute("tabindex");
+});
+
 document.querySelector("[data-current-year]").textContent = new Date().getFullYear();
 
 const showToast = () => {

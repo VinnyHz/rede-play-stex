@@ -53,14 +53,12 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 .admin-brand { display: flex; align-items: center; gap: 12px; font-family: "Space Grotesk", sans-serif; }
 .admin-brand-mark {
-  display: grid;
-  width: 42px;
-  height: 42px;
-  place-items: center;
-  border: 1px solid rgba(76, 141, 255, 0.45);
-  color: var(--blue);
-  font-size: 20px;
-  font-weight: 700;
+  display: block;
+  width: 76px;
+  height: auto;
+  flex-shrink: 0;
+  aspect-ratio: 800 / 226;
+  object-fit: contain;
 }
 .admin-brand span:last-child { display: grid; line-height: 1; }
 .admin-brand strong { font-size: 14px; letter-spacing: 0.08em; }
