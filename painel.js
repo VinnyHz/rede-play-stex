@@ -4,7 +4,7 @@ const PORTAL_CONFIG = {
 };
 
 const requestedReturn = new URLSearchParams(window.location.search).get("return");
-const safeReturnPage = ["loja.html", "admin.html"].includes(requestedReturn) ? requestedReturn : "";
+const safeReturnPage = ["loja.html", "admin.html", "musicas.html"].includes(requestedReturn) ? requestedReturn : "";
 
 const getPortalToken = () => window.RPS_SESSION.getToken();
 

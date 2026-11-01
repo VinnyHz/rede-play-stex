@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Envie sua música, gere um link e dê o play na sua JBL dentro da Rede Play Stex." />
+  <meta name="theme-color" content="#050b16" />
+  <title>Músicas para JBL — Rede Play Stex</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon-rps.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=server-status-1" />
+  <link rel="stylesheet" href="account-header.css?v=4" />
+  <link rel="stylesheet" href="musicas.css?v=1" />
+</head>
+<body class="music-body">
+  <div class="noise" aria-hidden="true"></div>
+  <header class="music-header">
+    <div class="container music-nav">
+      <a class="brand" href="index.html" aria-label="Rede Play Stex — início">
+        <img class="brand-mark" src="assets/rps-logo.svg" width="800" height="226" alt="" />
+        <span class="brand-copy"><strong>REDE PLAY</strong><small>STEX</small></span>
+      </a>
+      <nav aria-label="Navegação principal"><a href="index.html">Início</a><a href="loja.html">Loja</a><a class="active" href="musicas.html" aria-current="page">Músicas JBL</a></nav>
+      <div class="account-header" data-account-header data-account-autoload><a class="music-account" href="painel.html?return=musicas.html">Minha conta <span aria-hidden="true">↗</span></a></div>
+    </div>
+  </header>
+
+  <main class="container music-main">
+    <section class="music-hero" aria-labelledby="music-title">
+      <div>
+        <span class="music-kicker"><i aria-hidden="true"></i> O SOM DA SUA RESENHA</span>
+        <h1 id="music-title">SUA TRILHA.<br /><span>DENTRO DO JOGO.</span></h1>
+        <p>Sua música merece rodar por Los Santos.<br class="desktop-break" /> Envie o áudio, copie o link e dê o play na sua JBL.</p>
+        <div class="music-tags"><span>MP3 & OGG</span><span>Link direto</span><span>PC + Android</span></div>
+      </div>
+      <div class="sound-art" aria-hidden="true">
+        <div class="sound-orbit orbit-one"></div><div class="sound-orbit orbit-two"></div>
+        <div class="sound-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="speaker"><div class="speaker-controls">− &nbsp; ◇ &nbsp; +</div><div class="speaker-cone cone-one"></div><div class="speaker-cone cone-two"></div><b>RPS</b></div>
+        <span class="sound-caption"><i></i> PRÓXIMA FAIXA: A SUA.</span>
+      </div>
+    </section>
+
+    <div class="music-workspace">
+      <section class="music-card upload-card" aria-labelledby="upload-heading">
+        <div class="music-card-title"><div><span class="music-kicker">01 / ENVIE SEU SOM</span><h2 id="upload-heading">Bora gerar esse link?</h2></div><span class="music-icon" aria-hidden="true">↗</span></div>
+        <form id="music-form">
+          <div class="music-drop" id="music-drop">
+            <input id="music-file" name="music" type="file" accept=".mp3,.ogg,audio/mpeg,audio/ogg" aria-describedby="file-help" />
+            <label for="music-file"><span class="upload-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 16V3m-5 5 5-5 5 5M4 15v5h16v-5" /></svg></span><strong id="file-label">Escolha ou arraste sua música</strong><span id="file-help">MP3 ou OGG (Vorbis) · até 20 MB</span><span class="file-select">Selecionar arquivo <span aria-hidden="true">+</span></span></label>
+          </div>
+          <div id="selected-file" class="music-selected" hidden>
+            <label for="music-name">Nome da música</label>
+            <input id="music-name" maxlength="80" autocomplete="off" placeholder="Como essa faixa vai aparecer na biblioteca" />
+            <audio id="local-preview" controls preload="metadata" aria-label="Prévia da música selecionada"></audio>
+            <p id="file-details"></p>
+          </div>
+          <div id="music-session" class="music-session"><span aria-hidden="true">↳</span><p>Entre com sua conta do servidor para enviar e guardar suas músicas.</p><a href="painel.html?return=musicas.html">Entrar na conta ↗</a></div>
+          <div class="upload-progress" id="upload-progress" hidden><progress max="100" value="0" aria-label="Progresso do envio"></progress><span id="progress-label">Enviando…</span></div>
+          <button class="music-primary" id="upload-button" type="submit" disabled>Gerar link da música <span aria-hidden="true">→</span></button>
+          <p class="music-status" id="music-status" role="status" aria-live="polite" aria-atomic="true"></p>
+          <p class="music-fine">O link fica disponível enquanto a música estiver na sua biblioteca.</p>
+        </form>
+        <section class="music-result" id="music-result" aria-labelledby="result-heading" hidden>
+          <span class="music-kicker">PRONTO PARA TOCAR</span><h3 id="result-heading">Seu link está na mão.</h3>
+          <label class="visually-hidden" for="generated-link">Link direto da música</label>
+          <div class="music-copy-row"><input id="generated-link" readonly /><button class="music-primary" id="copy-result" type="button">Copiar link</button></div>
+          <p>Abra a JBL no jogo e cole esse link no campo da música.</p>
+        </section>
+      </section>
+
+      <aside class="music-guide" aria-labelledby="guide-heading">
+        <span class="music-kicker">DO SITE PRA CIDADE</span><h2 id="guide-heading">Três passos.<br />Uma boa resenha.</h2>
+        <ol><li><span>01</span><div><h3>Escolha sua música</h3><p>Pegue um arquivo MP3 ou OGG no celular ou no computador.</p></div></li><li><span>02</span><div><h3>Gere e copie o link</h3><p>Confira a prévia, envie a faixa e copie o endereço que aparecer.</p></div></li><li><span>03</span><div><h3>Dê o play na JBL</h3><p>Cole o link na sua caixa de som dentro do servidor e curta com a galera.</p></div></li></ol>
+        <div class="music-guide-note"><span aria-hidden="true">♪</span><p><strong>Sua seleção fica aqui.</strong>Volte quando quiser para copiar os links ou organizar sua biblioteca.</p></div>
+      </aside>
+    </div>
+
+    <section class="music-card music-library" aria-labelledby="library-heading">
+      <div class="library-heading"><div><span class="music-kicker">02 / SUA BIBLIOTECA</span><h2 id="library-heading">Minhas músicas</h2></div><button class="music-secondary" type="button" id="refresh-library" hidden>Atualizar <span aria-hidden="true">↻</span></button></div>
+      <p class="library-usage" id="library-usage">Até 10 músicas e 100 MB por conta. Seus links ficam reunidos aqui.</p>
+      <div id="library-empty" class="library-empty"><span aria-hidden="true">♫</span><div><h3>A próxima faixa é sua.</h3><p>Entre na sua conta e envie a primeira música para começar.</p></div></div>
+      <div id="music-tracks" class="music-tracks"></div>
+      <p id="library-status" class="music-status" role="status" aria-live="polite" aria-atomic="true"></p>
+    </section>
+    <noscript><p>Ative o JavaScript no navegador para enviar músicas e gerar links.</p></noscript>
+  </main>
+  <footer class="music-footer container"><span>REDE PLAY STEX <b>/</b> SUA CIDADE. SEU SOM.</span><a href="index.html">Conheça o servidor <span aria-hidden="true">↗</span></a></footer>
+  <script src="portal-session.js?v=1"></script><script src="account-header.js?v=4"></script><script src="musicas.js?v=1"></script>
+</body>
+</html>
