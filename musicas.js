@@ -8,10 +8,16 @@
   const form = $('#music-form'), fileInput = $('#music-file'), drop = $('#music-drop');
   const uploadButton = $('#upload-button'), status = $('#music-status'), libraryStatus = $('#library-status');
   let file = null, localUrl = null, serviceAvailable = false, busy = false, xhr = null, generation = 0;
+  let converterAvailable = false, conversionJob = null, conversionTimer = null, conversionSubmitting = false, announcedConversion = null;
   let limits = { maxFileBytes: 20 * 1024 * 1024, maxTracks: 10, maxTotalBytes: 100 * 1024 * 1024 };
   const mb = bytes => `${(bytes / (1024 * 1024)).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} MB`;
   function message(node, text, error = false) { node.textContent = text; node.dataset.error = String(error); }
-  function updateButton() { uploadButton.disabled = !file || !token() || !serviceAvailable || busy; fileInput.disabled = busy; $('#music-name').disabled = busy; }
+  function updateButton() {
+    uploadButton.disabled = !file || !token() || !serviceAvailable || busy; fileInput.disabled = busy; $('#music-name').disabled = busy;
+    const active = conversionJob && ['queued','processing'].includes(conversionJob.status);
+    $('#convert-button').disabled = !token() || !serviceAvailable || !converterAvailable || conversionSubmitting || !!active;
+    $('#conversion-url').disabled = conversionSubmitting || !!active; $('#conversion-title').disabled = conversionSubmitting || !!active;
+  }
   function sessionView() { $('#music-session').hidden = !!token(); $('#refresh-library').hidden = !token(); updateButton(); }
   function resetLibrary() { $('#music-tracks').replaceChildren(); $('#library-empty').hidden = false; $('#library-usage').textContent = 'Até 10 músicas e 100 MB por conta. Seus links ficam reunidos aqui.'; }
   async function apiRequest(path, options = {}) {
@@ -24,7 +30,7 @@
   async function refreshLibrary() {
     const version = ++generation;
     sessionView();
-    if (!token()) { serviceAvailable = false; resetLibrary(); message(libraryStatus, ''); return; }
+    if (!token()) { serviceAvailable = false; converterAvailable = false; resetLibrary(); message(libraryStatus, ''); updateButton(); return; }
     $('#refresh-library').disabled = true;
     message(libraryStatus, 'Carregando suas músicas…');
     try {
@@ -32,12 +38,17 @@
       if (version !== generation || !token()) return;
       serviceAvailable = data.available;
       limits = data.limits;
+      converterAvailable = !!data.converter?.available;
+      if (data.conversion) renderConversion(data.conversion);
+      else if (!converterAvailable) message($('#conversion-status'), 'Conversor temporariamente offline. Você pode enviar um arquivo pela outra aba.');
+      else message($('#conversion-status'), 'Cole o link e converta. O MP3 vai direto para a sua biblioteca.');
       renderTracks(data.tracks);
       message(libraryStatus, data.available ? '' : 'O envio de músicas ainda não está disponível. Volte em breve.');
       message(status, data.available ? '' : 'O envio de músicas ainda não está disponível.');
     } catch (error) {
       if (version !== generation) return;
       serviceAvailable = false;
+      converterAvailable = false;
       message(libraryStatus, error.message, true);
     } finally {
       if (version === generation) { $('#refresh-library').disabled = false; sessionView(); }
@@ -127,6 +138,64 @@
     finally { busy = false; xhr = null; $('#upload-progress').hidden = true; sessionView(); }
   });
 
+  function chooseSource(mode) {
+    for (const [name, panel] of [['link','link-panel'],['file','music-form']]) {
+      const tab = $(`#${name}-tab`), chosen = mode === name;
+      tab.setAttribute('aria-selected', String(chosen)); tab.tabIndex = chosen ? 0 : -1; $(`#${panel}`).hidden = !chosen;
+    }
+  }
+  for (const mode of ['link','file']) {
+    $(`#${mode}-tab`).addEventListener('click', () => chooseSource(mode));
+    $(`#${mode}-tab`).addEventListener('keydown', event => { if (['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) { event.preventDefault(); const next = event.key === 'Home' ? 'link' : event.key === 'End' ? 'file' : mode === 'link' ? 'file' : 'link'; chooseSource(next); $(`#${next}-tab`).focus(); } });
+  }
+  const conversionMessages = { queued:'Seu vídeo está na fila. A conversão vai começar em breve.', downloading:'Buscando o áudio do vídeo…', converting:'Convertendo o áudio para MP3…', publishing:'Salvando o MP3 na sua biblioteca…' };
+  function renderConversion(job) {
+    clearTimeout(conversionTimer); conversionTimer = null;
+    conversionJob = job;
+    const active = ['queued','processing'].includes(job.status);
+    $('#conversion-progress').hidden = !active; $('#conversion-retry').hidden = true;
+    if (active) {
+      message($('#conversion-status'), conversionMessages[job.phase] || conversionMessages.queued);
+      if (!document.hidden) conversionTimer = setTimeout(() => void pollConversion(), 5000);
+    } else if (job.status === 'failed') message($('#conversion-status'), job.message || 'Não foi possível converter esse vídeo.', true);
+    else if (job.status === 'completed') {
+      message($('#conversion-status'), job.track ? 'MP3 pronto! Copie o link abaixo ou ouça na sua biblioteca.' : 'O MP3 desta conversão já foi excluído da biblioteca.');
+      if (job.track && announcedConversion !== job.id) {
+        announcedConversion = job.id; $('#generated-link').value = job.track.url; $('#music-result').hidden = false;
+        void refreshLibrary();
+      }
+    }
+    updateButton();
+  }
+  async function pollConversion() {
+    if (!conversionJob || !token()) return;
+    const id = conversionJob.id, bearer = token();
+    $('#conversion-retry').disabled = true;
+    try {
+      const data = await apiRequest(`/api/music/conversions/${id}`);
+      if (conversionJob?.id === id && token() === bearer) renderConversion(data.conversion);
+    } catch (error) { message($('#conversion-status'), `${error.message} Atualize a conversão para tentar novamente.`, true); $('#conversion-progress').hidden = true; $('#conversion-retry').hidden = !token(); }
+    finally { $('#conversion-retry').disabled = false; }
+  }
+  $('#conversion-retry').addEventListener('click', () => void pollConversion());
+  $('#conversion-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    if ($('#convert-button').disabled) return;
+    const bearer = token(); conversionSubmitting = true; updateButton(); $('#music-result').hidden = true;
+    message($('#conversion-status'), 'Enviando seu pedido…');
+    try {
+      const data = await apiRequest('/api/music/conversions', { method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({url:$('#conversion-url').value.trim(),title:$('#conversion-title').value.trim()}) });
+      if (token() === bearer) renderConversion(data.conversion);
+    } catch (error) { message($('#conversion-status'), error.message, true); }
+    finally { conversionSubmitting = false; updateButton(); }
+  });
+  document.addEventListener('visibilitychange', () => { clearTimeout(conversionTimer); conversionTimer = null; if (!document.hidden && conversionJob && ['queued','processing'].includes(conversionJob.status)) void pollConversion(); });
+  function clearConversion() { clearTimeout(conversionTimer); conversionTimer = null; conversionJob = null; converterAvailable = false; announcedConversion = null; $('#conversion-progress').hidden = true; $('#conversion-retry').hidden = true; message($('#conversion-status'), 'Entre novamente na sua conta para converter um vídeo.'); }
+  window.addEventListener('rps:session-expired', clearConversion);
+  window.addEventListener('storage', event => { if (event.key === 'rps_portal_session') clearConversion(); });
+  window.addEventListener('pagehide', () => { clearTimeout(conversionTimer); conversionTimer = null; });
+
   async function copyLink(url, target) {
     try {
       await navigator.clipboard.writeText(url);
@@ -156,7 +225,10 @@
       const actions = node('div', 'music-track-actions');
       if (track.status === 'ready') {
         const audio = node('audio'); audio.controls = true; audio.preload = 'none'; audio.src = track.url; audio.setAttribute('aria-label', `Ouvir ${track.title}`);
-        card.append(audio);
+        const retryAudio = node('button', 'music-secondary', 'Tentar ouvir novamente'); retryAudio.type = 'button'; retryAudio.hidden = true;
+        audio.addEventListener('error', () => { retryAudio.hidden = false; message(libraryStatus, 'Não foi possível ouvir agora. Uma música recém-enviada pode levar cerca de um minuto para ficar disponível. Aguarde e tente novamente.', true); });
+        retryAudio.addEventListener('click', () => { audio.load(); void audio.play().then(() => { retryAudio.hidden = true; message(libraryStatus, ''); }).catch(() => { retryAudio.hidden = false; }); });
+        card.append(audio, retryAudio);
         const copy = node('button', 'music-primary', 'Copiar link'); copy.type = 'button'; copy.addEventListener('click', () => void copyLink(track.url, libraryStatus));
         const open = node('a', 'music-secondary', 'Abrir ↗'); open.href = track.url; open.target = '_blank'; open.rel = 'noopener'; open.setAttribute('aria-label', `Abrir áudio de ${track.title}`);
         actions.append(copy, open);

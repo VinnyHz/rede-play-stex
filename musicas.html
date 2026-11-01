@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=server-status-1" />
   <link rel="stylesheet" href="account-header.css?v=4" />
-  <link rel="stylesheet" href="musicas.css?v=1" />
+  <link rel="stylesheet" href="musicas.css?v=converter-1" />
 </head>
 <body class="music-body">
   <div class="noise" aria-hidden="true"></div>
@@ -32,8 +32,8 @@
       <div>
         <span class="music-kicker"><i aria-hidden="true"></i> O SOM DA SUA RESENHA</span>
         <h1 id="music-title">SUA TRILHA.<br /><span>DENTRO DO JOGO.</span></h1>
-        <p>Sua música merece rodar por Los Santos.<br class="desktop-break" /> Envie o áudio, copie o link e dê o play na sua JBL.</p>
-        <div class="music-tags"><span>MP3 & OGG</span><span>Link direto</span><span>PC + Android</span></div>
+        <p>Sua música merece rodar por Los Santos.<br class="desktop-break" /> Cole um link ou envie o áudio. A próxima faixa é sua.</p>
+        <div class="music-tags"><span>Vídeo → MP3</span><span>Link para JBL</span><span>PC + Android</span></div>
       </div>
       <div class="sound-art" aria-hidden="true">
         <div class="sound-orbit orbit-one"></div><div class="sound-orbit orbit-two"></div>
@@ -46,7 +46,26 @@
     <div class="music-workspace">
       <section class="music-card upload-card" aria-labelledby="upload-heading">
         <div class="music-card-title"><div><span class="music-kicker">01 / ENVIE SEU SOM</span><h2 id="upload-heading">Bora gerar esse link?</h2></div><span class="music-icon" aria-hidden="true">↗</span></div>
-        <form id="music-form">
+        <div class="music-source-tabs" role="tablist" aria-label="Como adicionar uma música">
+          <button type="button" id="link-tab" role="tab" aria-controls="link-panel" aria-selected="true">Colar link do vídeo <span aria-hidden="true">↗</span></button>
+          <button type="button" id="file-tab" role="tab" aria-controls="music-form" aria-selected="false" tabindex="-1">Enviar arquivo <span aria-hidden="true">+</span></button>
+        </div>
+        <div id="music-session" class="music-session"><span aria-hidden="true">↳</span><p>Entre com sua conta do servidor para enviar e guardar suas músicas.</p><a href="painel.html?return=musicas.html">Entrar na conta ↗</a></div>
+        <section id="link-panel" role="tabpanel" aria-labelledby="link-tab">
+          <form id="conversion-form" class="conversion-form">
+            <label for="conversion-url">Link do vídeo ou áudio</label>
+            <input id="conversion-url" type="url" inputmode="url" maxlength="2000" autocomplete="off" placeholder="https://www.youtube.com/watch?v=…" required aria-describedby="conversion-help" />
+            <p id="conversion-help">YouTube, Vimeo ou link direto de áudio/vídeo · até 10 minutos</p>
+            <label for="conversion-title">Nome da música <span>(opcional)</span></label>
+            <input id="conversion-title" maxlength="80" autocomplete="off" placeholder="Use o nome do vídeo ou escolha outro" />
+            <div class="conversion-steps" aria-hidden="true"><span>01. COLE O LINK</span><i>→</i><span>02. CONVERTA</span><i>→</i><span>03. DÊ O PLAY</span></div>
+            <button class="music-primary" id="convert-button" type="submit" disabled>Converter para MP3 <span aria-hidden="true">→</span></button>
+          </form>
+          <div class="upload-progress" id="conversion-progress" hidden><progress aria-label="Andamento da conversão"></progress></div>
+          <p class="music-status" id="conversion-status" role="status" aria-live="polite" aria-atomic="true"></p>
+          <button class="music-secondary" type="button" id="conversion-retry" hidden>Atualizar conversão ↻</button>
+        </section>
+        <form id="music-form" role="tabpanel" aria-labelledby="file-tab" hidden>
           <div class="music-drop" id="music-drop">
             <input id="music-file" name="music" type="file" accept=".mp3,.ogg,audio/mpeg,audio/ogg" aria-describedby="file-help" />
             <label for="music-file"><span class="upload-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 16V3m-5 5 5-5 5 5M4 15v5h16v-5" /></svg></span><strong id="file-label">Escolha ou arraste sua música</strong><span id="file-help">MP3 ou OGG (Vorbis) · até 20 MB</span><span class="file-select">Selecionar arquivo <span aria-hidden="true">+</span></span></label>
@@ -57,23 +76,22 @@
             <audio id="local-preview" controls preload="metadata" aria-label="Prévia da música selecionada"></audio>
             <p id="file-details"></p>
           </div>
-          <div id="music-session" class="music-session"><span aria-hidden="true">↳</span><p>Entre com sua conta do servidor para enviar e guardar suas músicas.</p><a href="painel.html?return=musicas.html">Entrar na conta ↗</a></div>
           <div class="upload-progress" id="upload-progress" hidden><progress max="100" value="0" aria-label="Progresso do envio"></progress><span id="progress-label">Enviando…</span></div>
           <button class="music-primary" id="upload-button" type="submit" disabled>Gerar link da música <span aria-hidden="true">→</span></button>
-          <p class="music-status" id="music-status" role="status" aria-live="polite" aria-atomic="true"></p>
           <p class="music-fine">O link fica disponível enquanto a música estiver na sua biblioteca.</p>
         </form>
+        <p class="music-status" id="music-status" role="status" aria-live="polite" aria-atomic="true"></p>
         <section class="music-result" id="music-result" aria-labelledby="result-heading" hidden>
           <span class="music-kicker">PRONTO PARA TOCAR</span><h3 id="result-heading">Seu link está na mão.</h3>
           <label class="visually-hidden" for="generated-link">Link direto da música</label>
           <div class="music-copy-row"><input id="generated-link" readonly /><button class="music-primary" id="copy-result" type="button">Copiar link</button></div>
-          <p>Abra a JBL no jogo e cole esse link no campo da música.</p>
+          <p>Abra a JBL no jogo e cole esse link no campo da música. Se acabou de enviar, o áudio pode levar cerca de um minuto para ficar disponível.</p>
         </section>
       </section>
 
       <aside class="music-guide" aria-labelledby="guide-heading">
         <span class="music-kicker">DO SITE PRA CIDADE</span><h2 id="guide-heading">Três passos.<br />Uma boa resenha.</h2>
-        <ol><li><span>01</span><div><h3>Escolha sua música</h3><p>Pegue um arquivo MP3 ou OGG no celular ou no computador.</p></div></li><li><span>02</span><div><h3>Gere e copie o link</h3><p>Confira a prévia, envie a faixa e copie o endereço que aparecer.</p></div></li><li><span>03</span><div><h3>Dê o play na JBL</h3><p>Cole o link na sua caixa de som dentro do servidor e curta com a galera.</p></div></li></ol>
+        <ol><li><span>01</span><div><h3>Traga seu som</h3><p>Cole o link de um vídeo ou escolha um arquivo MP3 ou OGG do seu aparelho.</p></div></li><li><span>02</span><div><h3>Converta e copie o link</h3><p>Acompanhe a conversão para MP3. O áudio fica salvo na sua biblioteca, pronto para ouvir e copiar.</p></div></li><li><span>03</span><div><h3>Dê o play na JBL</h3><p>Cole o link na sua caixa de som dentro do servidor e curta com a galera.</p></div></li></ol>
         <div class="music-guide-note"><span aria-hidden="true">♪</span><p><strong>Sua seleção fica aqui.</strong>Volte quando quiser para copiar os links ou organizar sua biblioteca.</p></div>
       </aside>
     </div>
@@ -88,6 +106,6 @@
     <noscript><p>Ative o JavaScript no navegador para enviar músicas e gerar links.</p></noscript>
   </main>
   <footer class="music-footer container"><span>REDE PLAY STEX <b>/</b> SUA CIDADE. SEU SOM.</span><a href="index.html">Conheça o servidor <span aria-hidden="true">↗</span></a></footer>
-  <script src="portal-session.js?v=1"></script><script src="account-header.js?v=4"></script><script src="musicas.js?v=1"></script>
+  <script src="portal-session.js?v=1"></script><script src="account-header.js?v=4"></script><script src="musicas.js?v=converter-1"></script>
 </body>
 </html>
