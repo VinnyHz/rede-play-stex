@@ -239,7 +239,7 @@ const updateContinueButton = () => {
   } else if (connectedPlayer) {
     continueLabel.textContent = "Comprar com MV";
     if (pixLabel) {
-      pixLabel.textContent = currentPlan ? `Pix ${formatReais(currentPlan.pixPrice)}` : "Pagar com Pix";
+      pixLabel.textContent = currentPlan ? `Comprar com Pix · ${formatReais(currentPlan.pixPrice)}` : "Comprar com Pix";
     }
   } else {
     continueLabel.textContent = "Conectar personagem";
@@ -292,6 +292,7 @@ const refreshPackageEligibility = async () => {
 };
 
 const renderDisconnectedAccount = () => {
+  window.RPS_STORE_DISCORD?.stop();
   connectedPlayer = null;
   packageEligibility = null;
   packageEligibilityError = false;
@@ -612,7 +613,7 @@ const renderPixOrder = (order, openModal = true) => {
   if (pixDiscount) pixDiscount.textContent = `− ${formatCents(discountCents)}`;
 
   const statusMessages = {
-    awaiting_payment: "Pedido criado. Depois de pagar, envie o comprovante e este código para a administração.",
+    awaiting_payment: "Pedido criado. Continue no ticket do Discord e envie o comprovante para a equipe conferir.",
     approved: "Pagamento aprovado. A entrega está sendo preparada.",
     queued: "Pagamento aprovado. Entre no jogo e mantenha o personagem conectado para receber.",
     processing: mvOrder ? "O servidor está creditando suas moedas agora." : (packageOrder ? "O servidor está entregando os itens do seu pacote agora." : "O servidor está entregando seu plano agora."),
@@ -673,6 +674,7 @@ const pollPixOrder = async (orderId, openModal = false, generation = ++pixPollGe
 
 const closePixCheckout = () => {
   if (!pixModal) return;
+  window.RPS_STORE_DISCORD?.stop();
   pixModal.hidden = true;
   document.body.classList.remove("store-modal-open");
 };
@@ -694,6 +696,7 @@ const openPixCheckout = async (product = currentPlan) => {
   const savedPixOrder = pendingPixOrders.get(product.id);
   if (savedPixOrder && !isDuplicatePackagePayment(savedPixOrder)) {
     await pollPixOrder(savedPixOrder.orderId, true);
+    if (currentPixOrder?.orderId === savedPixOrder.orderId) await window.RPS_STORE_DISCORD?.open(currentPixOrder);
     return;
   }
 
@@ -726,6 +729,7 @@ const openPixCheckout = async (product = currentPlan) => {
     renderPixOrder(result.order, true);
     if (product.kind === "package") await refreshPackageStock();
     pollPixOrder(result.order.orderId, false);
+    await window.RPS_STORE_DISCORD?.open(result.order);
   } catch (error) {
     if (error.status === 401) {
       clearPortalToken();
@@ -763,6 +767,7 @@ const buyMvWithPix = async (event) => {
   const savedPixOrder = pendingPixOrders.get("mv-coins");
   if (savedPixOrder) {
     await pollPixOrder(savedPixOrder.orderId, true);
+    if (currentPixOrder?.orderId === savedPixOrder.orderId) await window.RPS_STORE_DISCORD?.open(currentPixOrder);
     return;
   }
 
@@ -798,6 +803,7 @@ const buyMvWithPix = async (event) => {
     sessionStorage.setItem(STORE_CONFIG.activePixOrderKey, String(result.order.orderId));
     renderPixOrder(result.order, true);
     pollPixOrder(result.order.orderId, false);
+    await window.RPS_STORE_DISCORD?.open(result.order);
   } catch (error) {
     if (error.status === 401) {
       clearPortalToken();
@@ -887,6 +893,10 @@ storeTabs.forEach((tab, index) => {
   });
 });
 pixCopyButton?.addEventListener("click", copyPixOrder);
+pixDiscordLink?.addEventListener("click", (event) => {
+  event.preventDefault();
+  void window.RPS_STORE_DISCORD?.open(currentPixOrder);
+});
 document.querySelectorAll("[data-pix-close]").forEach((button) => {
   button.addEventListener("click", closePixCheckout);
 });
@@ -909,6 +919,7 @@ renderMvQuote();
 const initializeStore = async () => {
   await refreshPackageStock();
   const connected = await refreshAccount();
+  await window.RPS_STORE_DISCORD?.resume();
   const initializeGeneration = pixPollGeneration;
   if (connected) {
     try {
@@ -937,4 +948,16 @@ const initializeStore = async () => {
   }
 };
 
+window.RPS_STORE_DISCORD?.init({
+  apiRequest,
+  showOrder: (order) => renderPixOrder(order, true),
+  reportStatus: (message) => {
+    const status = document.querySelector("[data-discord-checkout-status]");
+    if (status) { status.textContent = message; status.hidden = !message; }
+    if (pixCopyStatus) { pixCopyStatus.textContent = message; pixCopyStatus.hidden = false; }
+    if (isPackagePixOrder(currentPixOrder)) setPackageStatus(message);
+    else if (isMvPixOrder(currentPixOrder)) setMvStatus(message);
+    else setPurchaseStatus(message);
+  },
+});
 initializeStore();

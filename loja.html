@@ -51,7 +51,7 @@
           <h1>VANTAGENS PARA<br /><span>SUA HISTÓRIA.</span></h1>
           <p>
             Escolha seu plano de Sócio ou compre moedas MV. Planos podem ser pagos
-            com MV ou Pix; as moedas são adquiridas pelo Pix e creditadas no jogo.
+            com MV ou Pix; compras no Pix continuam em um ticket privado no Discord.
           </p>
           <a class="store-scroll-link" href="#produtos">
             Ver produtos
@@ -90,6 +90,8 @@
           </div>
           <a href="painel.html?return=loja.html" data-store-account-link>Conectar personagem</a>
         </div>
+
+        <p class="purchase-status" data-discord-checkout-status role="status" aria-live="polite" hidden></p>
 
         <nav class="store-tabs" role="tablist" aria-label="Categorias da loja">
           <button
@@ -305,7 +307,7 @@
                 <span aria-hidden="true">→</span>
               </button>
               <button type="button" class="payment-pix" data-plan-pix>
-                <span data-plan-pix-label>Pagar com Pix</span>
+                <span data-plan-pix-label>Comprar com Pix</span>
                 <span aria-hidden="true">◇</span>
               </button>
             </div>
@@ -337,7 +339,7 @@
               <p class="starter-package-stock" data-package-stock role="status">Consultando estoque…</p>
               <div class="starter-package-price"><div><small>PAGAMENTO ÚNICO</small><strong>R$ 5<span>,00</span></strong></div><span>PIX</span></div>
               <button type="button" class="starter-package-buy" data-package-pix><span data-package-pix-label>Comprar por R$ 5 no Pix</span><span aria-hidden="true">↗</span></button>
-              <p class="starter-package-delivery">Uma compra por conta. Entrega no jogo após aprovação do Pix.</p>
+              <p class="starter-package-delivery">Uma compra por conta. O Pix abre um ticket no Discord; a entrega ocorre após a aprovação.</p>
               <small class="purchase-status starter-package-status" data-package-status role="status" hidden></small>
             </div>
           </article>
@@ -356,7 +358,7 @@
               <span class="store-index">RECARGA / MOEDAS VIP</span>
               <h3>COLOQUE MV<br /><span>NA SUA CONTA.</span></h3>
             </div>
-            <p>Escolha a quantidade, confira o valor e pague pelo Pix. Após a conferência da equipe, as moedas serão enviadas ao seu personagem.</p>
+            <p>Escolha a quantidade e confira o valor. A compra por Pix abre um ticket privado no Discord. Após a conferência da equipe, as moedas serão enviadas ao seu personagem.</p>
           </div>
 
           <form class="mv-purchase-form" data-mv-form novalidate>
@@ -437,7 +439,7 @@
         <ol>
           <li><span>01</span><div><strong>Escolha o produto</strong><small>Selecione um plano, pacote ou a quantidade de MV.</small></div></li>
           <li><span>02</span><div><strong>Conecte seu personagem</strong><small>Use o código gerado com o comando /painel.</small></div></li>
-          <li><span>03</span><div><strong>Escolha MV ou Pix</strong><small>Use seu saldo do jogo ou pague o valor indicado no QR Code.</small></div></li>
+          <li><span>03</span><div><strong>Escolha MV ou Pix</strong><small>Planos aceitam saldo de MV. No Pix, conecte seu Discord para abrir o ticket de compra.</small></div></li>
           <li><span>04</span><div><strong>Receba no servidor</strong><small>Após a aprovação e com o personagem online, a entrega vai para o jogo.</small></div></li>
         </ol>
       </section>
@@ -449,7 +451,7 @@
         <button class="pix-close" type="button" data-pix-close aria-label="Fechar">×</button>
         <span class="store-index">PAGAMENTO / PIX</span>
         <h2 id="pix-title">PAGUE COM<br /><span>PIX.</span></h2>
-        <p class="pix-intro">Escaneie o QR Code, pague o valor exato e envie o comprovante com os dados do pedido.</p>
+        <p class="pix-intro">Conecte sua conta do Discord para abrir um ticket privado com os dados desta compra. Envie o comprovante por lá.</p>
         <div class="pix-checkout-grid">
           <div class="pix-qr-wrap">
             <img src="pix-qrcode.jpeg" alt="QR Code Pix da Rede Play Stex" width="250" height="250" />
@@ -473,7 +475,7 @@
         <p class="pix-warning">O Pix não é confirmado automaticamente. Guarde o comprovante e somente pague o valor exibido acima.</p>
         <div class="pix-actions">
           <button type="button" data-copy-pix-order>Copiar dados do pedido</button>
-          <a href="https://discord.gg/B2gHbcpqfA" target="_blank" rel="noreferrer" data-pix-discord>Enviar comprovante no Discord</a>
+          <a href="#" data-pix-discord>Abrir ticket no Discord</a>
         </div>
         <small class="pix-copy-status" data-pix-copy-status hidden></small>
       </section>
@@ -492,6 +494,7 @@
 
     <script src="portal-session.js?v=1"></script>
     <script src="account-header.js?v=4"></script>
-    <script src="loja.js?v=8"></script>
+    <script src="store-discord.js?v=1"></script>
+    <script src="loja.js?v=9"></script>
   </body>
 </html>
