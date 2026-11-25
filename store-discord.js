@@ -58,14 +58,14 @@
       if (!result.ticket) throw new Error('Atualize a loja e tente abrir o ticket novamente.');
       sessionStorage.setItem(storageKey, JSON.stringify({ orderId: order.orderId }));
       await track(order.orderId, result.ticket, attempt);
-    } catch (error) { if (attempt === generation) reportStatus(error.message || 'Não foi possível abrir o ticket no Discord.'); }
+    } catch (error) { if (attempt === generation) reportStatus(error.message || 'Não foi possível abrir o ticket no Discord.', 'error'); }
   };
   const resume = async () => {
     const saved = savedCheckout();
     if (!returned) return;
     sessionStorage.removeItem(storageKey);
     if (!saved || !Number.isSafeInteger(saved.orderId) || saved.orderId <= 0 || saved.state !== returned.state) {
-      reportStatus('A conexão com o Discord expirou. Abra seu pedido e tente novamente.');
+      reportStatus('A conexão com o Discord expirou. Abra seu pedido e tente novamente.', 'error');
       return;
     }
     stop();
@@ -80,7 +80,7 @@
       });
       if (attempt !== generation) return;
       await track(saved.orderId, result.ticket, attempt);
-    } catch (error) { if (attempt === generation) reportStatus(error.message || 'Não foi possível conectar ao Discord.'); }
+    } catch (error) { if (attempt === generation) reportStatus(error.message || 'Não foi possível conectar ao Discord.', 'error'); }
   };
   window.RPS_STORE_DISCORD = Object.freeze({
     init(options) { ({ apiRequest: api, showOrder, reportStatus } = options); }, open, resume, stop,

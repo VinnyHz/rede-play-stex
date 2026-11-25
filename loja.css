@@ -1660,6 +1660,11 @@
   text-align: center;
 }
 
+.pix-copy-status.is-error,
+[data-discord-checkout-status].is-error {
+  color: #ff7c82;
+}
+
 .purchase-flow {
   display: grid;
   grid-template-columns: 0.7fr 1fr;

@@ -73,6 +73,7 @@ let currentPlan = null;
 let purchaseInProgress = false;
 let currentPixReference = "";
 let currentPixOrder = null;
+let discordCheckoutMessage = null;
 let pixPollTimer = 0;
 let quoteTimer = 0;
 let quoteRequestId = 0;
@@ -587,6 +588,11 @@ const renderPixOrder = (order, openModal = true) => {
     return;
   }
   currentPixOrder = order;
+  if (discordCheckoutMessage && (discordCheckoutMessage.orderId !== order.orderId || order.status !== "awaiting_payment")) {
+    discordCheckoutMessage = null;
+    const status = document.querySelector("[data-discord-checkout-status]");
+    if (status) status.hidden = true;
+  }
   if (activityChanged) void window.RPS_ACCOUNT?.refreshNotifications();
   currentPixReference = pixReferenceFor(order.orderId);
   const mvOrder = isMvPixOrder(order);
@@ -613,7 +619,7 @@ const renderPixOrder = (order, openModal = true) => {
   if (pixDiscount) pixDiscount.textContent = `− ${formatCents(discountCents)}`;
 
   const statusMessages = {
-    awaiting_payment: "Pedido criado. Continue no ticket do Discord e envie o comprovante para a equipe conferir.",
+    awaiting_payment: "Pedido Pix criado. Abra o ticket no Discord para continuar a compra.",
     approved: "Pagamento aprovado. A entrega está sendo preparada.",
     queued: "Pagamento aprovado. Entre no jogo e mantenha o personagem conectado para receber.",
     processing: mvOrder ? "O servidor está creditando suas moedas agora." : (packageOrder ? "O servidor está entregando os itens do seu pacote agora." : "O servidor está entregando seu plano agora."),
@@ -621,10 +627,11 @@ const renderPixOrder = (order, openModal = true) => {
     rejected: order.failureReason || "O pagamento não foi confirmado pela administração.",
     failed: failureMessages[order.failureReason] || order.failureReason || `Não foi possível entregar ${mvOrder ? "as moedas" : (packageOrder ? "o pacote" : "o plano")}. Fale com a administração.`,
   };
-  const message = statusMessages[order.status] || "Acompanhando seu pedido Pix.";
+  const message = discordCheckoutMessage?.message || statusMessages[order.status] || "Acompanhando seu pedido Pix.";
   if (pixCopyStatus) {
     pixCopyStatus.textContent = message;
     pixCopyStatus.hidden = false;
+    pixCopyStatus.classList.toggle("is-error", discordCheckoutMessage?.type === "error");
   }
 
   if (["completed", "rejected", "failed"].includes(order.status)) {
@@ -635,7 +642,7 @@ const renderPixOrder = (order, openModal = true) => {
 
   const statusType = order.status === "completed"
     ? "success"
-    : (["rejected", "failed"].includes(order.status) ? "error" : "");
+    : (["rejected", "failed"].includes(order.status) ? "error" : (discordCheckoutMessage?.type || ""));
   if (mvOrder) setMvStatus(message, statusType);
   else if (packageOrder) setPackageStatus(message, statusType);
   else setPurchaseStatus(message, statusType);
@@ -951,13 +958,15 @@ const initializeStore = async () => {
 window.RPS_STORE_DISCORD?.init({
   apiRequest,
   showOrder: (order) => renderPixOrder(order, true),
-  reportStatus: (message) => {
+  reportStatus: (message, type = "") => {
+    discordCheckoutMessage = currentPixOrder?.status === "awaiting_payment"
+      ? { orderId: currentPixOrder.orderId, message, type } : null;
     const status = document.querySelector("[data-discord-checkout-status]");
-    if (status) { status.textContent = message; status.hidden = !message; }
-    if (pixCopyStatus) { pixCopyStatus.textContent = message; pixCopyStatus.hidden = false; }
-    if (isPackagePixOrder(currentPixOrder)) setPackageStatus(message);
-    else if (isMvPixOrder(currentPixOrder)) setMvStatus(message);
-    else setPurchaseStatus(message);
+    if (status) { status.textContent = message; status.hidden = !message; status.classList.toggle("is-error", type === "error"); }
+    if (pixCopyStatus) { pixCopyStatus.textContent = message; pixCopyStatus.hidden = false; pixCopyStatus.classList.toggle("is-error", type === "error"); }
+    if (isPackagePixOrder(currentPixOrder)) setPackageStatus(message, type);
+    else if (isMvPixOrder(currentPixOrder)) setMvStatus(message, type);
+    else setPurchaseStatus(message, type);
   },
 });
 initializeStore();
