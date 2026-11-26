@@ -232,21 +232,45 @@ const updateContinueButton = () => {
     packagePixLabel.textContent = label;
   }
   if (!continueButton || !continueLabel) return;
-  continueButton.disabled = purchaseInProgress;
-  if (pixButton) pixButton.disabled = purchaseInProgress;
+  const differentPlan = membershipConflict(currentPlan);
+  const activePlan = Number(connectedPlayer?.vipLevel) > 0 && Number(connectedPlayer?.vipExpire) > 0;
+  const renewal = activePlan && currentPlan && !differentPlan;
+  const notice = document.querySelector("[data-membership-notice]");
+  const manage = document.querySelector("[data-manage-membership]");
+  if (notice) {
+    notice.hidden = !activePlan;
+    notice.textContent = differentPlan || (renewal
+      ? `Você tem ${currentPlan.name}. A renovação soma 31 dias aos ${formatMembershipTime(connectedPlayer.vipExpire)} restantes, sem perder seu tempo atual.` : "");
+  }
+  if (manage) manage.hidden = !activePlan;
+  continueButton.disabled = purchaseInProgress || Boolean(differentPlan);
+  if (pixButton) pixButton.disabled = purchaseInProgress || Boolean(differentPlan);
   if (purchaseInProgress) {
     continueLabel.textContent = "Processando pedido...";
     if (pixLabel) pixLabel.textContent = "Aguarde...";
   } else if (connectedPlayer) {
-    continueLabel.textContent = "Comprar com MV";
+    continueLabel.textContent = differentPlan ? "Plano diferente ativo" : renewal ? "Renovar +31 dias com MV" : "Comprar com MV";
     if (pixLabel) {
-      pixLabel.textContent = currentPlan ? `Comprar com Pix · ${formatReais(currentPlan.pixPrice)}` : "Comprar com Pix";
+      pixLabel.textContent = differentPlan ? "Plano diferente ativo" : currentPlan ? `${renewal ? "Renovar" : "Comprar"} com Pix · ${formatReais(currentPlan.pixPrice)}` : "Comprar com Pix";
     }
   } else {
     continueLabel.textContent = "Conectar personagem";
     if (pixLabel) pixLabel.textContent = "Conectar para usar Pix";
   }
   updateMvButtons();
+};
+
+const membershipLevels = { "socio-comum": 6, "socio-premium": 7, "socio-diamante": 4, "socio-esmeralda": 8, "socio-black": 5 };
+const membershipNames = { 1: "VIP Comum", 2: "VIP Premium", 3: "VIP Plus", 4: "Sócio Diamante", 5: "Sócio Black", 6: "Sócio Comum", 7: "Sócio Premium", 8: "Sócio Esmeralda", 9: "Sócio Stex" };
+const formatMembershipTime = (seconds) => {
+  const minutes = Math.floor(Math.max(Number(seconds) || 0, 0) / 60);
+  const days = Math.floor(minutes / 1440);
+  return days > 0 ? `${days} dias e ${Math.floor(minutes % 1440 / 60)}h` : `${Math.floor(minutes / 60)}h e ${minutes % 60}min`;
+};
+const membershipConflict = (plan) => {
+  const level = Number(connectedPlayer?.vipLevel);
+  if (!plan || level <= 0 || Number(connectedPlayer?.vipExpire) <= 0 || membershipLevels[plan.id] === level) return "";
+  return `Você tem ${membershipNames[level] || "um VIP/Sócio"} ativo. Renove o mesmo plano para somar tempo ou retire o atual na Área do Jogador antes de comprar ${plan.name}.`;
 };
 
 const refreshPackageStock = async () => {
@@ -439,7 +463,7 @@ const selectPlan = (button, shouldScroll = true) => {
 };
 
 const failureMessages = {
-  active_vip: "Este personagem já possui um VIP ou Sócio ativo.",
+  active_vip: "Este personagem possui um plano diferente ativo. Retire o atual na Área do Jogador antes de trocar.",
   insufficient_balance: "O saldo de MV no jogo não é suficiente para concluir a compra.",
   invalid_plan: "O plano escolhido não foi reconhecido pelo servidor.",
   invalid_order: "O pedido recebido pelo servidor é inválido.",
@@ -503,8 +527,8 @@ const buySelectedPlan = async () => {
     return;
   }
 
-  if (Number(connectedPlayer.vipLevel) > 0 && Number(connectedPlayer.vipExpire) > 0) {
-    setPurchaseStatus("Você já possui um VIP ou Sócio ativo. Aguarde o plano terminar.", "error");
+  if (membershipConflict(currentPlan)) {
+    setPurchaseStatus(membershipConflict(currentPlan), "error");
     return;
   }
   if (Number(connectedPlayer.vipCoins) < currentPlan.price) {
@@ -513,7 +537,7 @@ const buySelectedPlan = async () => {
   }
 
   const confirmed = window.confirm(
-    `Confirmar ${currentPlan.name} por ${formatMv(currentPlan.price)}? O valor será descontado no jogo.`
+    `Confirmar ${currentPlan.name} por ${formatMv(currentPlan.price)}? Serão adicionados 31 dias${Number(connectedPlayer.vipLevel) === membershipLevels[currentPlan.id] && Number(connectedPlayer.vipExpire) > 0 ? " ao seu tempo restante" : " de benefícios"}. O valor será descontado no jogo.`
   );
   if (!confirmed) return;
 
@@ -695,8 +719,8 @@ const openPixCheckout = async (product = currentPlan) => {
     return;
   }
 
-  if (product.kind !== "package" && Number(connectedPlayer.vipLevel) > 0 && Number(connectedPlayer.vipExpire) > 0) {
-    setCheckoutStatus("Você já possui um VIP ou Sócio ativo. Aguarde o plano terminar.", "error");
+  if (product.kind !== "package" && membershipConflict(product)) {
+    setCheckoutStatus(membershipConflict(product), "error");
     return;
   }
 
@@ -920,6 +944,9 @@ try {
 }
 
 const savedTab = sessionStorage.getItem(STORE_CONFIG.activeTabKey);
+const requestedPlanId = new URLSearchParams(window.location.search || "").get("plano");
+const requestedPlanButton = planButtons.find(button => button.dataset.planId === requestedPlanId);
+if (requestedPlanButton) selectPlan(requestedPlanButton, false);
 switchStoreTab(["socios", "pacotes", "mv"].includes(savedTab) ? savedTab : "socios");
 renderMvQuote();
 

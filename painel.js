@@ -38,6 +38,15 @@ let connectedPlayer = null;
 let rewardOrderInProgress = false;
 let rewardOrderPolling = false;
 let restoringSession = false;
+const membershipDialog = document.querySelector("[data-membership-dialog]");
+const removeMembershipButton = document.querySelector("[data-remove-membership]");
+const refreshMembershipButton = document.querySelector("[data-refresh-membership]");
+let membershipOrder = null;
+let membershipTimer = 0;
+let membershipOwner = null;
+let membershipGeneration = 0;
+let membershipSubmitting = false;
+let confirmedMembershipLevel = 0;
 
 document.querySelector("[data-current-year]").textContent = new Date().getFullYear();
 
@@ -119,6 +128,109 @@ const vipPlans = {
   8: ["Sócio Esmeralda", "Você possui um dos planos especiais da Rede Play Stex."],
   9: ["Sócio Stex", "O nível máximo de benefícios e reconhecimento na comunidade."],
 };
+
+const membershipPlanIds = { 4: "socio-diamante", 5: "socio-black", 6: "socio-comum", 7: "socio-premium", 8: "socio-esmeralda" };
+const membershipTime = (seconds) => {
+  const minutes = Math.floor(Math.max(Number(seconds) || 0, 0) / 60);
+  const days = Math.floor(minutes / 1440);
+  const hours = Math.floor((minutes % 1440) / 60);
+  return days > 0 ? `${days} dias e ${hours}h` : hours > 0 ? `${hours}h e ${minutes % 60}min` : `${minutes}min`;
+};
+const membershipStatus = (message = "") => {
+  const element = document.querySelector("[data-membership-status]");
+  if (element) { element.textContent = message; element.hidden = !message; }
+};
+const updateMembership = () => {
+  const active = Number(connectedPlayer?.vipLevel) > 0 && Number(connectedPlayer?.vipExpire) > 0;
+  const time = document.querySelector("[data-membership-time]");
+  if (time) {
+    time.hidden = !active;
+    time.textContent = `Tempo restante: ${membershipTime(connectedPlayer?.vipExpire)} de jogo.`;
+  }
+  if (removeMembershipButton) {
+    removeMembershipButton.hidden = !active;
+    removeMembershipButton.disabled = membershipSubmitting || Boolean(membershipOrder);
+  }
+  if (refreshMembershipButton) refreshMembershipButton.hidden = !membershipOrder;
+  const shop = document.querySelector("[data-membership-shop]");
+  if (shop) {
+    const id = active && membershipPlanIds[connectedPlayer.vipLevel];
+    shop.href = id ? `loja.html?plano=${id}` : "loja.html";
+    shop.textContent = id ? "Renovar +31 dias" : "Ver planos";
+  }
+};
+const checkMembershipOrder = async () => {
+  if (!membershipOrder || !connectedPlayer) return;
+  window.clearTimeout(membershipTimer);
+  const generation = membershipGeneration;
+  try {
+    const result = await apiRequest(`/api/store/purchases/${membershipOrder.orderId}`);
+    if (generation !== membershipGeneration) return;
+    const order = result.order;
+    if (["completed", "failed"].includes(order.status)) {
+      await refreshConnectedPlayer();
+      if (generation !== membershipGeneration) return;
+      membershipOrder = null;
+      membershipStatus(order.status === "completed" ? "Plano retirado. Você já pode comprar outro sócio." :
+        order.failureReason === "membership_changed" ? "Seu plano mudou no jogo. Confira o plano atual antes de tentar retirar novamente." :
+        "Não foi possível retirar seu plano. Seus benefícios foram preservados. Tente novamente.");
+      updateMembership();
+      void window.RPS_ACCOUNT?.refreshNotifications();
+      return;
+    }
+    membershipStatus("Retirada aguardando o servidor. Entre no jogo com este personagem para concluir.");
+    membershipTimer = window.setTimeout(() => void checkMembershipOrder(), 5000);
+  } catch (error) {
+    if (generation !== membershipGeneration) return;
+    membershipStatus(`${error.message} Use “Consultar retirada” para tentar novamente.`);
+  }
+  updateMembership();
+};
+const resumeMembershipRemoval = async () => {
+  if (!connectedPlayer || membershipOwner === connectedPlayer.accountId) return;
+  membershipOwner = connectedPlayer.accountId;
+  const generation = membershipGeneration;
+  try {
+    const result = await apiRequest("/api/membership/removal");
+    if (generation !== membershipGeneration) return;
+    membershipOrder = result.order;
+    updateMembership();
+    if (membershipOrder) void checkMembershipOrder();
+  } catch (error) {
+    if (generation !== membershipGeneration) return;
+    membershipOwner = null;
+    membershipStatus(error.status === 404 ? "A retirada de sócio ainda precisa ser ativada no servidor do site." : error.message);
+  }
+};
+removeMembershipButton?.addEventListener("click", () => {
+  if (!connectedPlayer || membershipOrder || membershipSubmitting) return;
+  confirmedMembershipLevel = Number(connectedPlayer.vipLevel);
+  setText("[data-membership-confirmation]", `Você tem ${vipPlans[confirmedMembershipLevel]?.[0] || "um VIP/Sócio"}, com ${membershipTime(connectedPlayer.vipExpire)} restantes. Tem certeza de que deseja retirar?`);
+  membershipDialog.showModal();
+});
+document.querySelector("[data-cancel-membership]")?.addEventListener("click", () => membershipDialog.close());
+refreshMembershipButton?.addEventListener("click", () => void checkMembershipOrder());
+document.querySelector("[data-confirm-membership]")?.addEventListener("click", async () => {
+  if (!connectedPlayer || membershipSubmitting || membershipOrder || !membershipDialog.open) return;
+  membershipDialog.close();
+  membershipSubmitting = true;
+  updateMembership();
+  const generation = membershipGeneration;
+  membershipStatus("Solicitando retirada...");
+  try {
+    const result = await apiRequest("/api/membership/removal", {
+      method: "POST", body: JSON.stringify({ confirm: true, vipLevel: confirmedMembershipLevel }),
+    });
+    if (generation !== membershipGeneration) return;
+    membershipOrder = result.order;
+    void checkMembershipOrder();
+  } catch (error) {
+    if (generation !== membershipGeneration) return;
+    membershipStatus(error.message);
+  } finally {
+    if (generation === membershipGeneration) { membershipSubmitting = false; updateMembership(); }
+  }
+});
 
 const showAlert = (message) => {
   formAlert.textContent = message;
@@ -321,7 +433,7 @@ const renderDashboard = (player) => {
   const exp = Math.max(Number(player.exp) || 0, 0);
   const deaths = Math.max(Number(player.deaths) || 0, 0);
   const kills = Math.max(Number(player.kills) || 0, 0);
-  const vipLevel = Math.max(Number(player.vipLevel) || 0, 0);
+  const vipLevel = Number(player.vipExpire) > 0 ? Math.max(Number(player.vipLevel) || 0, 0) : 0;
   const rpsTokens = Math.min(Math.max(Number(player.rpsTokens) || 0, 0), 100);
   const vip = vipPlans[vipLevel] || [`VIP Nível ${vipLevel}`, "Seu plano VIP está ativo no servidor."];
 
@@ -353,6 +465,8 @@ const renderDashboard = (player) => {
   const rewardsProgress = document.querySelector("[data-rps-token-progress]");
   if (rewardsProgress) rewardsProgress.style.width = `${rpsTokens}%`;
   updateRewardOptions(rpsTokens);
+  updateMembership();
+  void resumeMembershipRemoval();
 
   loginView.hidden = true;
   dashboardView.hidden = false;
@@ -377,6 +491,13 @@ const finishAuthentication = (player) => {
 };
 
 const showLogin = () => {
+  membershipGeneration += 1;
+  membershipOwner = null;
+  membershipOrder = null;
+  membershipSubmitting = false;
+  window.clearTimeout(membershipTimer);
+  membershipDialog?.close();
+  membershipStatus();
   connectedPlayer = null;
   window.RPS_ACCOUNT?.reset();
   closeRewardsModal();

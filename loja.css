@@ -1941,3 +1941,6 @@
     gap: 18px;
   }
 }
+/* Membership renewals keep the remaining play time. */
+[data-membership-notice] { max-width: 580px; margin: 12px 0 8px; font-size: 0.875rem; line-height: 1.6; }
+[data-manage-membership] { display: inline-block; margin-bottom: 8px; color: #83b2ff; font-size: 0.875rem; text-decoration: underline; }

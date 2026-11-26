@@ -15,7 +15,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css?v=rps-1" />
-    <link rel="stylesheet" href="painel.css?v=5" />
+    <link rel="stylesheet" href="painel.css?v=membership-1" />
     <link rel="stylesheet" href="account-header.css?v=4" />
   </head>
   <body class="portal-body">
@@ -227,7 +227,13 @@
               <span>PLANO VIP</span>
               <h3 data-vip-name>Nenhum plano ativo</h3>
               <p data-vip-description>Conheça os benefícios exclusivos disponíveis para seu personagem.</p>
-              <a href="index.html#comunidade">Ver benefícios <b>↗</b></a>
+              <p class="membership-time" data-membership-time hidden></p>
+              <div class="membership-actions">
+                <a href="loja.html" data-membership-shop>Ver planos</a>
+                <button type="button" data-remove-membership hidden>Retirar sócio</button>
+                <button type="button" data-refresh-membership hidden>Consultar retirada</button>
+              </div>
+              <p class="membership-status" data-membership-status role="status" hidden></p>
             </div>
             <div class="vip-emblem" aria-hidden="true">V</div>
           </article>
@@ -262,6 +268,16 @@
         </p>
       </section>
     </main>
+
+    <dialog class="membership-dialog" data-membership-dialog aria-labelledby="membership-dialog-title" aria-describedby="membership-dialog-description">
+      <h2 id="membership-dialog-title">Retirar seu plano?</h2>
+      <p id="membership-dialog-description" data-membership-confirmation></p>
+      <p>O tempo restante será perdido, sem reembolso. Depois que o servidor confirmar a retirada, você poderá comprar outro plano.</p>
+      <div class="membership-dialog-actions">
+        <button type="button" data-cancel-membership autofocus>Cancelar</button>
+        <button type="button" data-confirm-membership>Sim, retirar</button>
+      </div>
+    </dialog>
 
     <div class="rewards-modal" data-rewards-modal hidden>
       <button class="rewards-modal-backdrop" type="button" data-close-rewards aria-label="Fechar catálogo"></button>
@@ -318,6 +334,6 @@
 
     <script src="portal-session.js?v=1"></script>
     <script src="account-header.js?v=5"></script>
-    <script src="painel.js?v=identity-1"></script>
+    <script src="painel.js?v=membership-1"></script>
   </body>
 </html>
