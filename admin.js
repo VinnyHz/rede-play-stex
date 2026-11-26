@@ -187,7 +187,7 @@ const renderAccounts = (items) => {
     const player = document.createElement("strong");
     player.textContent = account.name;
     const meta = document.createElement("small");
-    meta.textContent = `ID #${String(account.accountId).padStart(4, "0")} • Skin ${account.skin}`;
+    meta.textContent = `ID #${String(account.publicAccountId ?? account.accountId).padStart(4, "0")} • RG ${account.rg ?? account.publicAccountId ?? account.accountId} • Skin ${account.skin}`;
     identityText.append(player, meta);
     identity.append(avatar, identityText);
 
@@ -264,7 +264,7 @@ const loadAccounts = async () => {
 const openAccountEditor = (account) => {
   editingAccount = account;
   editAccountName.textContent = account.name;
-  editAccountId.textContent = `CONTA #${account.accountId}${account.online ? " • ONLINE" : " • OFFLINE"}`;
+  editAccountId.textContent = `CONTA #${account.publicAccountId ?? account.accountId} · RG ${account.rg ?? account.publicAccountId ?? account.accountId}${account.online ? " • ONLINE" : " • OFFLINE"}`;
   EDITABLE_FIELDS.forEach((field) => {
     accountForm.elements[field].value = Number(account[field]) || 0;
   });

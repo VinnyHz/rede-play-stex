@@ -328,7 +328,8 @@ const renderDashboard = (player) => {
   setText("[data-player-first-name]", firstName);
   setText("[data-player-name]", name);
   renderPlayerSkin(player.skin, name);
-  setText("[data-account-id]", `#${String(player.accountId ?? 0).padStart(4, "0")}`);
+  setText("[data-account-id]", `#${String(player.publicAccountId ?? player.accountId ?? 0).padStart(4, "0")}`);
+  setText("[data-account-rg]", String(player.rg ?? player.publicAccountId ?? player.accountId ?? 0));
   setText("[data-job-name]", player.jobName || jobNames[player.job] || `Profissão #${player.job}`);
   setText("[data-level]", level);
   setText("[data-exp]", formatNumber(exp));

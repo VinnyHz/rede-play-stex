@@ -291,7 +291,7 @@
   readAll.addEventListener("click", () => void markRead(notifications.filter(item => !item.read).map(item => item.id)));
   find("[data-account-settings]").addEventListener("click", () => {
     closePopovers();
-    find(".account-settings-player").textContent = `${player.name} · Conta #${player.accountId}`;
+    find(".account-settings-player").textContent = `${player.name} · Conta #${player.publicAccountId ?? player.accountId} · RG ${player.rg ?? player.publicAccountId ?? player.accountId}`;
     find(".account-settings-status").hidden = true;
     dialog.querySelectorAll("input").forEach(input => { input.checked = preferences[input.name]; });
     dialog.showModal();
